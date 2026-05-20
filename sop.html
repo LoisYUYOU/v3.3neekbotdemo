@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>服务SOP模块提取</title>
+  <style>
+    /* ========================================================= */
+    /* 设计令牌 (Design Tokens) */
+    /* ========================================================= */
+    :root {
+      /* 基础颜色 */
+      --v2-color-bg-page: #FFFFFF;
+      --v2-color-text-secondary: #666666;
+      
+      /* SOP 模块专属颜色 */
+      --sop-brand-color: #12B886;
+      --sop-inactive-color: #EBEDF0;
+      --sop-title-color: #323233;
+      --sop-desc-color: #969799;
+
+      /* 圆角与间距 */
+      --v2-radius-xl: 16px;
+      --v2-spacing-sm: 8px;
+      --v2-spacing-xl: 24px;
+    }
+
+    body {
+      margin: 0;
+      background: #F5F5F5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* 限制最大宽度，适配 PC 和 移动端，保持与原应用一致 */
+    .app-container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--v2-color-bg-page);
+      min-height: 100vh;
+      padding: 24px 16px; /* 移除了原本的 mockHeader 干扰，独立设定内边距 */
+      box-sizing: border-box;
+    }
+
+    .sectionModule {
+      margin-bottom: var(--v2-spacing-xl);
+    }
+    
+    .moduleHeader {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--v2-color-text-secondary);
+      margin-bottom: var(--v2-spacing-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ========================================================= */
+    /* 交互式 SOP 模块 (Tab + Stepper) */
+    /* ========================================================= */
+    .sopInteractiveCard {
+      background: #FFFFFF;
+      border-radius: 8px; 
+      padding: 16px 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+    }
+
+    .stageTabs {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+
+    .stageTabs::before {
+      content: '';
+      position: absolute; top: 18px; left: 12.5%; right: 12.5%;
+      height: 2px; background: var(--sop-inactive-color); z-index: 1;
+    }
+
+    .stageTabItem {
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; z-index: 2; flex: 1; cursor: pointer;
+    }
+
+    .stageDotWrapper {
+      background: #fff; padding: 0 4px; margin-bottom: 8px;
+    }
+
+    .stageDot {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--sop-inactive-color);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #fff; font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .stageName {
+      font-size: 12px; color: var(--sop-desc-color);
+      transition: all 0.3s ease; white-space: nowrap;
+    }
+
+    /* 选中激活状态 */
+    .stageTabItem.is-active .stageDot {
+      background: var(--sop-brand-color);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 3px rgba(18, 184, 134, 0.15);
+    }
+    .stageTabItem.is-active .stageName {
+      color: var(--sop-title-color); font-size: 13px; font-weight: bold;
+    }
+
+    .subNodeStepper {
+      position: relative; padding: 0 8px; min-height: 200px;
+    }
+
+    .subNodeItem {
+      display: flex; position: relative; padding-bottom: 24px;
+    }
+    .subNodeItem:last-child { padding-bottom: 8px; }
+
+    .subNodeItem::before {
+      content: ''; position: absolute; left: 7px; top: 20px; bottom: -4px;
+      width: 1.5px; background: var(--sop-inactive-color);
+    }
+    .subNodeItem:last-child::before { display: none; }
+
+    .stepperDot {
+      width: 16px; height: 16px; margin-right: 16px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 2; background: #fff;
+    }
+    .stepperDotInner {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--sop-brand-color);
+    }
+
+    .stepperContent { flex: 1; transform: translateY(-2px); }
+    .stepperTitle { font-size: 14px; font-weight: bold; color: var(--sop-title-color); margin-bottom: 4px; }
+    .stepperDesc { font-size: 12px; color: var(--sop-desc-color); line-height: 1.5; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade {
+      animation: fadeSlideUp 0.3s ease forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ============================== -->
+    <!-- 模块：服务SOP                    -->
+    <!-- ============================== -->
+    <div class="sectionModule">
+      <div class="moduleHeader">03 服务SOP / Service SOP</div>
+      
+      <div class="sopInteractiveCard">
+        <!-- 顶部阶段 Tab -->
+        <div class="stageTabs" id="sopTabsContainer">
+          <div class="stageTabItem is-active" data-index="0">
+            <div class="stageDotWrapper"><div class="stageDot">1</div></div>
+            <div class="stageName">预定前</div>
+          </div>
+          <div class="stageTabItem" data-index="1">
+            <div class="stageDotWrapper"><div class="stageDot">2</div></div>
+            <div class="stageName">出行前</div>
+          </div>
+          <div class="stageTabItem" data-index="2">
+            <div class="stageDotWrapper"><div class="stageDot">3</div></div>
+            <div class="stageName">出行中</div>
+          </div>
+          <div class="stageTabItem" data-index="3">
+            <div class="stageDotWrapper"><div class="stageDot">4</div></div>
+            <div class="stageName">出行后</div>
+          </div>
+        </div>
+
+        <!-- 下方内容区域 -->
+        <div class="subNodeStepper" id="sopContentContainer">
+          <div class="animate-fade">
+            <div class="subNodeItem">
+              <div class="stepperDot"><div class="stepperDotInner"></div></div>
+              <div class="stepperContent">
+                <div class="stepperTitle">需求沟通</div>
+                <div class="stepperDesc">1对1管家深入了解您的出行偏好与预算</div>
+              </div>
+            </div>
+            <div class="subNodeItem">
+              <div class="stepperDot"><div class="stepperDotInner"></div></div>
+              <div class="stepperContent">
+                <div class="stepperTitle">方案定制</div>
+                <div class="stepperDesc">24小时内输出专属行程规划与报价明细</div>
+              </div>
+            </div>
+            <div class="subNodeItem">
+              <div class="stepperDot"><div class="stepperDotInner"></div></div>
+              <div class="stepperContent">
+                <div class="stepperTitle">确认签约</div>
+                <div class="stepperDesc">线上确认行程，签署正规电子旅游合同</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div> <!-- app-container end -->
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // 服务 SOP 数据集合
+      const sopData = [
+        {
+          stageName: "预定前",
+          subNodes: [
+            { title: "需求沟通", desc: "1对1管家深入了解您的出行偏好与预算" },
+            { title: "方案定制", desc: "24小时内输出专属行程规划与报价明细" },
+            { title: "确认签约", desc: "线上确认行程，签署正规电子旅游合同" }
+          ]
+        },
+        {
+          stageName: "出行前",
+          subNodes: [
+            { title: "专属服务群", desc: "管家、计调、司机、导游齐聚，为您服务" },
+            { title: "出团通知书", desc: "提前发送详细天气、穿搭指南及注意事项" },
+            { title: "行前确认", desc: "提前1天确认航班/车次及专车接机信息" }
+          ]
+        },
+        {
+          stageName: "出行中",
+          subNodes: [
+            { title: "专车接机", desc: "司机举牌接站，协助搬运行李，直达酒店" },
+            { title: "沉浸游玩", desc: "金牌导游全程陪同讲解，纯玩无隐形消费" },
+            { title: "24h响应", desc: "行程中任何突发问题，管家全天候极速解决" }
+          ]
+        },
+        {
+          stageName: "出行后",
+          subNodes: [
+            { title: "专车送机", desc: "根据返程时间提前安排送机，不误点" },
+            { title: "服务回访", desc: "倾听您的真实反馈，不断优化服务体验" },
+            { title: "开具发票", desc: "提供正规电子发票，极速发送至邮箱" }
+          ]
+        }
+      ];
+
+      const tabs = document.querySelectorAll('.stageTabItem');
+      const contentContainer = document.getElementById('sopContentContainer');
+
+      // 渲染SOP下级节点内容的函数
+      function renderSopContent(index) {
+        const data = sopData[index];
+        let htmlStr = '<div class="animate-fade">'; 
+        
+        data.subNodes.forEach(node => {
+          htmlStr += `
+            <div class="subNodeItem">
+              <div class="stepperDot"><div class="stepperDotInner"></div></div>
+              <div class="stepperContent">
+                <div class="stepperTitle">${node.title}</div>
+                <div class="stepperDesc">${node.desc}</div>
+              </div>
+            </div>
+          `;
+        });
+        
+        htmlStr += '</div>';
+        
+        // 先清空内容，然后短暂延迟重新渲染以触发动画
+        contentContainer.innerHTML = '';
+        setTimeout(() => {
+          contentContainer.innerHTML = htmlStr;
+        }, 10);
+      }
+
+      // 绑定 Tab 点击切换事件
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', function() {
+          // 移除所有高亮状态
+          tabs.forEach(t => t.classList.remove('is-active'));
+          // 为当前点击的元素添加高亮
+          this.classList.add('is-active');
+          
+          // 获取索引并渲染数据
+          const idx = parseInt(this.getAttribute('data-index'));
+          renderSopContent(idx);
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>

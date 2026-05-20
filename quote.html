@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safari 定制报价单</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 隐藏横向滚动条但保留滚动功能 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+
+    /* 卡片的律动过渡效果 */
+    .agency-card {
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    /* 差异点轻微提醒 */
+    .diff-highlight {
+      transition: color 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-[#f7f5f2] text-stone-800 font-sans antialiased selection:bg-emerald-900 selection:text-white relative">
+
+  <!-- 悬浮对比提示条 (Banner) -->
+  <div id="compare-banner" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-stone-900/95 backdrop-blur-md shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-2 opacity-0 -translate-y-4 pointer-events-none transition-all duration-500 ease-out border border-stone-700/50">
+     <svg class="w-4 h-4 text-[#d4af37]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+     <span class="text-[11px] font-medium text-stone-200 tracking-wide whitespace-nowrap">
+        正在与 <span id="compare-agency-name" class="font-bold text-white ml-0.5"></span> 对比
+     </span>
+  </div>
+
+  <div class="max-w-md mx-auto min-h-screen relative overflow-x-hidden pb-0 shadow-2xl sm:rounded-3xl sm:border-8 border-stone-900 sm:my-8 bg-[#f7f5f2]">
+    
+    <!-- --- 沉浸式高级黑卡头部 --- -->
+    <div class="bg-stone-900 text-stone-50 pt-6 pb-8 px-5 rounded-b-[2rem] shadow-lg relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 100% 0%, #ffffff 0%, transparent 50%)"></div>
+      
+      <header class="flex justify-between items-center relative z-10 mb-6">
+        <button id="lang-toggle" class="flex items-center gap-1.5 bg-stone-800/50 hover:bg-stone-700/50 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium transition-all text-stone-300 border border-stone-700/50">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+          <span id="lang-text">中 / EN</span>
+        </button>
+        <div class="text-right">
+          <span class="text-[10px] text-stone-400 uppercase tracking-widest block mb-0.5">Quote Ref</span>
+          <span class="text-xs text-stone-300 font-mono tracking-wider">Q-20260429-X8A</span>
+        </div>
+      </header>
+
+      <div class="relative z-10">
+        <h2 class="text-2xl font-light tracking-wide">尊敬的 <span class="font-semibold">Alex</span></h2>
+      </div>
+
+      <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-5 pt-5 border-t border-stone-800/60 relative z-10">
+        <div>
+          <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Departure</p>
+          <p class="text-sm font-medium text-stone-200">2026/05/01</p>
+        </div>
+        <div>
+          <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Duration</p>
+          <p class="text-sm font-medium text-stone-200">10天 9晚</p>
+        </div>
+        <div>
+          <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Guests</p>
+          <p class="text-sm font-medium text-stone-200">2 成人</p>
+        </div>
+        <div>
+          <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Notes</p>
+          <p class="text-sm font-medium text-stone-200 truncate">蜜月旅行 · 大床房</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- 地接社选择模块 --- -->
+    <div class="relative z-20 mt-2 mb-6">
+      <div class="mt-6 mb-3 px-5 flex items-center justify-between">
+         <h3 class="text-sm font-bold text-stone-800 uppercase tracking-widest flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-stone-800"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+            Select Provider
+         </h3>
+      </div>
+      <div id="agency-carousel" class="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pl-5 pr-5 pb-5 pt-1 items-center"></div>
+      <div class="flex items-center justify-between px-6">
+         <div id="carousel-dots" class="flex items-center gap-1.5"></div>
+         <button id="view-all-agencies-btn" class="flex items-center gap-1 text-[10px] font-bold text-stone-500 uppercase tracking-widest hover:text-stone-800 transition-colors">
+            查看全部 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+         </button>
+      </div>
+    </div>
+
+    <!-- 区域 1：价格与明细 -->
+    <div class="mx-4 mt-6 mb-8 bg-white rounded-[2rem] pt-8 px-5 pb-4 shadow-sm border border-stone-200/50 relative z-10">
+      <div class="mb-8">
+        <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center justify-center gap-2 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+          Financial Summary
+        </h3>
+        <div class="text-center mb-6">
+          <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">人均总费用</p>
+          <div class="relative inline-flex items-baseline justify-center gap-1">
+            <span id="diff-total" class="absolute -top-3 -right-12 text-sm font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+            <span class="text-2xl font-medium text-stone-400">$</span>
+            <span id="val-total" class="text-5xl font-semibold text-stone-900 tracking-tight">2,614</span>
+            <span class="text-xl font-medium text-stone-400">.20</span>
+          </div>
+        </div>
+        <div class="bg-stone-50 rounded-2xl p-5 space-y-3 border border-stone-100/80">
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-stone-500">交通费用</span>
+            <div class="relative flex items-center">
+              <span id="diff-transport" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+              <span class="font-medium text-stone-800">$<span id="val-transport">875</span></span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-stone-500">住宿费用</span>
+            <div class="relative flex items-center">
+              <span id="diff-accommodation" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+              <span class="font-medium text-stone-800">$<span id="val-accommodation">959</span></span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-stone-500">门票及活动</span>
+            <div class="relative flex items-center">
+              <span id="diff-activities" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+              <span class="font-medium text-stone-800">$<span id="val-activities">530</span></span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-sm pt-3 border-t border-stone-200/60">
+            <span class="text-stone-500">服务费</span>
+            <div class="relative flex items-center">
+              <span id="diff-service" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+              <span class="font-medium text-stone-800">$<span id="val-service">300</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-0">
+        <section class="py-5 border-t border-stone-100">
+          <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+            <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg> 
+              Transport Details
+            </h3>
+            <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </div>
+          <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+            <div class="overflow-hidden">
+              <div class="pt-5 px-1">
+                <div class="flex justify-between items-start mb-4">
+                  <div>
+                    <p class="text-[10px] text-stone-400 uppercase tracking-wider mb-1">Vehicle Type</p>
+                    <p class="text-sm font-semibold text-stone-800">陆地巡航舰 4X4 Landcruiser</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-[10px] text-stone-400 uppercase tracking-wider mb-1">Total/Pax</p>
+                    <div class="relative inline-flex items-center justify-end">
+                      <span id="diff-detail-transport" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                      <p class="text-sm font-semibold text-emerald-800">$<span id="val-detail-transport">875</span></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex gap-6 text-xs">
+                  <div><span class="text-stone-400 block mb-0.5">服务天数</span><span class="font-medium text-stone-800">7 天</span></div>
+                  <div><span class="text-stone-400 block mb-0.5">每人每天</span><div class="relative inline-flex items-center"><span id="diff-detail-transportDaily" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span><span class="font-medium text-stone-800">$<span id="val-detail-transportDaily">125</span></span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- --- 住宿明细 (逐晚展示) --- -->
+        <section class="py-5 border-t border-stone-100">
+          <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+            <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/></svg>
+              Accommodation Details
+            </h3>
+            <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </div>
+          <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+            <div class="overflow-hidden">
+              <div class="pt-5 px-1">
+                <ul class="divide-y divide-stone-100">
+                  <!-- Night 1 -->
+                  <li class="py-4 flex gap-4 first:pt-0">
+                    <div class="w-10 shrink-0 text-center pt-0.5">
+                      <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">01</div>
+                    </div>
+                    <div class="grow flex justify-between items-start">
+                      <div>
+                        <h4 class="text-sm font-semibold text-stone-800">Tulia Amboseli Camp</h4>
+                        <p class="text-[10px] text-stone-400 mt-0.5">第一晚住宿</p>
+                      </div>
+                      <div class="text-right">
+                        <div class="relative inline-flex items-center">
+                          <span id="diff-detail-h1n1" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                          <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h1n1">132</span></span>
+                        </div>
+                        <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- Night 2 (模拟价格变动) -->
+                  <li class="py-4 flex gap-4">
+                    <div class="w-10 shrink-0 text-center pt-0.5">
+                      <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">02</div>
+                    </div>
+                    <div class="grow flex justify-between items-start">
+                      <div>
+                        <h4 class="text-sm font-semibold text-stone-800">Tulia Amboseli Camp</h4>
+                        <p class="text-[10px] text-stone-400 mt-0.5">第二晚住宿</p>
+                      </div>
+                      <div class="text-right">
+                        <div class="relative inline-flex items-center">
+                          <span id="diff-detail-h1n2" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                          <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h1n2">145</span></span>
+                        </div>
+                        <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                      </div>
+                    </div>
+                  </li>
+                  <!-- Night 3 -->
+                  <li class="py-4 flex gap-4">
+                    <div class="w-10 shrink-0 text-center pt-0.5">
+                      <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">03</div>
+                    </div>
+                    <div class="grow flex justify-between items-start">
+                      <div>
+                        <h4 class="text-sm font-semibold text-stone-800">Lake Nakuru Sopa Lodge</h4>
+                        <p class="text-[10px] text-stone-400 mt-0.5">第三晚住宿</p>
+                      </div>
+                      <div class="text-right">
+                        <div class="relative inline-flex items-center">
+                          <span id="diff-detail-h2n1" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                          <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h2n1">155</span></span>
+                        </div>
+                        <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- 区域 2：地接社服务详情 (Provider Services) -->
+    <div class="mx-4 mt-6 mb-8 bg-[#f4efe6] rounded-[2rem] pt-8 px-5 pb-4 shadow-sm border border-stone-200/50 relative z-10">
+      <div class="mb-8 flex flex-col items-center text-center">
+        <div class="w-12 h-12 bg-[#1b3b36] text-[#e8ecd7] rounded-2xl flex items-center justify-center mb-3 shadow-lg transform -rotate-3 transition-transform duration-300 hover:rotate-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h2 class="text-xl font-bold text-stone-800 tracking-tight">Provider Services</h2>
+        <p class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">服务保障与专属福利</p>
+      </div>
+
+      <div class="space-y-0">
+        <section class="py-5 border-t border-stone-200/60">
+          <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+            <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0">Value Adds</h3>
+            <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </div>
+          <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+            <div class="overflow-hidden">
+              <div class="pt-5 px-1 space-y-5">
+                <div class="flex gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-700 mt-0.5 shrink-0"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                  <div>
+                    <p id="label-included" class="text-sm font-semibold text-stone-800 mb-1">包含费用</p>
+                    <p id="text-included" class="text-xs text-stone-500 leading-relaxed"></p>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-400 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  <div>
+                    <p id="label-excluded" class="text-sm font-semibold text-stone-800 mb-1">不含费用</p>
+                    <p id="text-excluded" class="text-xs text-stone-500 leading-relaxed"></p>
+                  </div>
+                </div>
+                <div id="perk-box" class="bg-[#ede8df] p-4 rounded-2xl flex items-start gap-3 border border-[#e5dfd5] transition-all duration-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#a68a61] mt-0.5 shrink-0"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3"/><path d="M15 8a3 3 0 1 0-3-3"/><path d="M12 8v14"/><path d="M3 15h18"/></svg>
+                  <div>
+                    <p id="label-perks" class="text-xs font-bold text-[#8a6e45] mb-1">专属福利赠送</p>
+                    <p id="text-perks" class="text-[11px] text-[#8a6e45]/80 leading-relaxed"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="py-5 border-t border-stone-200/60">
+          <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+            <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest m-0">Service Process</h4>
+            <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </div>
+          <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+            <div class="overflow-hidden">
+              <div class="pt-6 px-2">
+                <div class="flex justify-between items-center relative">
+                  <div class="absolute top-[5px] left-4 right-4 h-[1px] bg-stone-300/50 -z-0"></div>
+                  <div class="flex flex-col items-center gap-2 z-10 bg-[#f4efe6] px-1"><div class="w-2.5 h-2.5 rounded-full bg-emerald-800"></div><span class="text-[9px] text-stone-800 font-medium">确认报价</span></div>
+                  <div class="flex flex-col items-center gap-2 z-10 bg-[#f4efe6] px-1"><div class="w-2.5 h-2.5 rounded-full bg-emerald-800"></div><span class="text-[9px] text-stone-800 font-medium">定金支付</span></div>
+                  <div class="flex flex-col items-center gap-2 z-10 bg-[#f4efe6] px-1"><div class="w-2.5 h-2.5 rounded-full bg-stone-300"></div><span class="text-[9px] text-stone-500">房间预订</span></div>
+                  <div class="flex flex-col items-center gap-2 z-10 bg-[#f4efe6] px-1"><div class="w-2.5 h-2.5 rounded-full bg-stone-300"></div><span class="text-[9px] text-stone-500">行前准备</span></div>
+                  <div class="flex flex-col items-center gap-2 z-10 bg-[#f4efe6] px-1"><div class="w-2.5 h-2.5 rounded-full bg-stone-300"></div><span class="text-[9px] text-stone-500">落地接机</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 区域 3：行程概览 (Brief Itinerary)         -->
+    <!-- 放在最后作为收尾的核心内容                 -->
+    <!-- ========================================== -->
+    <div class="mx-4 mt-6 mb-8 bg-white rounded-[2rem] pt-8 px-5 pb-6 shadow-sm border border-stone-200/50 relative z-10">
+      <div class="mb-8 flex flex-col items-center text-center">
+        <div class="w-12 h-12 bg-[#1b3b36] text-[#e8ecd7] rounded-2xl flex items-center justify-center mb-3 shadow-lg transform -rotate-3 transition-transform duration-300 hover:rotate-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h2 class="text-xl font-bold text-stone-800 tracking-tight">Brief Itinerary</h2>
+        <p class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">精简版游猎动线</p>
+      </div>
+
+      <div class="px-1">
+        <div class="space-y-6">
+          <!-- Day 1 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/01</span><span class="text-sm font-semibold text-stone-800">Nairobi ➔ Amboseli</span></div>
+              <div class="flex gap-4 text-[10px] text-stone-400 mb-3 uppercase tracking-wider">
+                <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>240 km</span>
+                <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>4-5 hrs</span>
+              </div>
+            </div>
+          </div>
+          <!-- Day 2 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/02</span><span class="text-sm font-semibold text-stone-800">Amboseli 全天深度游猎</span></div>
+            </div>
+          </div>
+          <!-- Day 3 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/03</span><span class="text-sm font-semibold text-stone-800">Amboseli ➔ Lake Nakuru</span></div>
+              <div class="flex gap-4 text-[10px] text-stone-400 mb-3 uppercase tracking-wider">
+                <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>310 km</span>
+                <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>5-6 hrs</span>
+              </div>
+            </div>
+          </div>
+          <!-- Day 4 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/04</span><span class="text-sm font-semibold text-stone-800">Lake Nakuru ➔ Maasai Mara</span></div>
+            </div>
+          </div>
+          <!-- Day 5 & 6 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/05-06</span><span class="text-sm font-semibold text-stone-800">Maasai Mara 游猎之魂</span></div>
+            </div>
+          </div>
+          <!-- Day 7 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/07</span><span class="text-sm font-semibold text-stone-800">Maasai Mara ➔ Lake Naivasha</span></div>
+            </div>
+          </div>
+          <!-- Day 8 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/08</span><span class="text-sm font-semibold text-stone-800">Lake Naivasha ➔ Nairobi</span></div>
+            </div>
+          </div>
+          <!-- Day 9 -->
+          <div class="relative pl-6">
+            <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/09</span><span class="text-sm font-semibold text-stone-800">内罗毕城市探索 / 购物</span></div>
+            </div>
+          </div>
+          <!-- Day 10 -->
+          <div class="relative pl-6">
+            <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+            <div class="-mt-1">
+              <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/10</span><span class="text-sm font-semibold text-stone-800">送机启程 ➔ 温暖的家</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部悬浮操作区 -->
+    <div class="mt-6 px-5 pb-12 text-center relative z-10">
+      <p class="text-[10px] text-stone-400 uppercase tracking-widest mb-4">Valid Until 2026/05/30</p>
+      <button class="w-full bg-stone-900 text-white font-medium py-4 rounded-2xl shadow-xl shadow-stone-900/20 active:scale-95 transition-transform flex justify-center items-center gap-2">
+        联系客服确认行程 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-400"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div id="agency-sheet" class="hidden">
+      <div id="agency-sheet-backdrop" class="fixed inset-0 bg-stone-900/60 z-40 backdrop-blur-sm transition-opacity opacity-0 duration-300 ease-out"></div>
+      <div id="agency-sheet-content" class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2rem] z-50 p-6 shadow-2xl pb-10 border-t border-stone-200/50 transform translate-y-full transition-transform duration-500" style="transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);">
+        <div class="w-12 h-1.5 bg-stone-200 rounded-full mx-auto mb-6"></div>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-base font-semibold text-stone-800">全部服务提供商</h3>
+          <button id="close-agency-sheet" class="p-1.5 text-stone-400 hover:bg-stone-100 rounded-full transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="space-y-3 relative max-h-[50vh] overflow-y-auto no-scrollbar" id="agency-list-sheet"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 语言切换
+    let lang = '中';
+    const langToggleBtn = document.getElementById('lang-toggle');
+    const langTextSpan = document.getElementById('lang-text');
+    langToggleBtn.addEventListener('click', () => {
+      lang = lang === '中' ? 'EN' : '中';
+      langTextSpan.textContent = lang === '中' ? '中 / EN' : 'EN / 中';
+    });
+
+    // 价格数据映射
+    const agencyPrices = {
+      1: { total: 2614, transport: 875, transportDaily: 125, accommodation: 959, h1n1: 132, h1n2: 145, h2n1: 155, activities: 530, service: 300 },
+      2: { total: 2464, transport: 825, transportDaily: 118, accommodation: 859, h1n1: 120, h1n2: 130, h2n1: 140, activities: 530, service: 250 },
+      3: { total: 2394, transport: 855, transportDaily: 122, accommodation: 809, h1n1: 115, h1n2: 125, h2n1: 135, activities: 480, service: 250 },
+      4: { total: 2954, transport: 975, transportDaily: 139, accommodation: 1159, h1n1: 160, h1n2: 175, h2n1: 190, activities: 530, service: 290 },
+      5: { total: 2214, transport: 775, transportDaily: 110, accommodation: 759, h1n1: 105, h1n2: 115, h2n1: 120, activities: 480, service: 200 }
+    };
+
+    const agencies = [
+      { id: 1, name: 'LionRoar Safari 狮吼东非', logo: '🦁', rating: '5.0', label: 'Premium', services: {
+          included: "每人每天3L饮用水、所有税费、国家公园向导费",
+          excluded: "国际航班往返机票、肯尼亚入境签证费、司机与向导小费",
+          perks: "赠送 AMREF 飞行救援险\n内罗毕首日五星级住宿（价值 $150）"
+      }},
+      { id: 2, name: 'Savanna Trek 萨凡纳旅行', logo: '🐘', rating: '4.9', label: 'Popular', services: {
+          included: "每人每天2L饮用水、所有税费、公园向导费",
+          excluded: "往返机票、电子签证费、自理餐饮、向导小费",
+          perks: "赠送 SAFARICOM 当地电话卡\n内罗毕希尔顿酒店首日住宿"
+      }},
+      { id: 3, name: 'Kilimanjaro Dreams 之梦', logo: '🏔️', rating: '4.8', label: 'Classic', services: {
+          included: "每日无限供应饮用水、所有税费、向导费",
+          excluded: "国际机票、签证费、个人保险、小费",
+          perks: "赠送 Safari 草帽及望远镜租借\n内罗毕首日机场附近四星级住宿"
+      }},
+      { id: 4, name: 'Serengeti Pioneers 探索者', logo: '🐆', rating: '4.9', label: 'Adventure', services: {
+          included: "每人每天4L饮用水、全包门费、专业中文向导",
+          excluded: "机票、签证、酒精饮料、向导及搬运工小费",
+          perks: "赠送 AMREF 飞行救援险 + 全程专业摄影服务\n内罗毕海明威酒店首日住宿"
+      }},
+      { id: 5, name: 'Mara Experts 马赛马拉专家', logo: '🦒', rating: '4.7', label: 'Local', services: {
+          included: "每人每天2L饮用水、所有国家公园门票",
+          excluded: "国际/国内航段机票、签证、小费、行程外活动",
+          perks: "赠送 马赛马拉当地纪念工艺品一份\n内罗毕首日经济型快捷酒店"
+      }},
+    ];
+    
+    let selectedAgencyId = 1, baseAgencyId = 1;     
+    const carouselContainer = document.getElementById('agency-carousel'), carouselDotsContainer = document.getElementById('carousel-dots');
+    let cardElements = [], isDragging = false; 
+
+    // 字符差异对比
+    function getDiffHTML(sel, base) {
+      if (sel === base || !base) return sel;
+      const matrix = Array(sel.length + 1).fill().map(() => Array(base.length + 1).fill(0));
+      for (let i = 1; i <= sel.length; i++) {
+        for (let j = 1; j <= base.length; j++) {
+          if (sel[i-1] === base[j-1]) matrix[i][j] = matrix[i-1][j-1] + 1;
+          else matrix[i][j] = Math.max(matrix[i-1][j], matrix[i][j-1]);
+        }
+      }
+      let i = sel.length, j = base.length, res = [];
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && sel[i-1] === base[j-1]) { res.push({ char: sel[i-1], diff: false }); i--; j--; }
+        else if (j > 0 && (i === 0 || matrix[i][j-1] >= matrix[i-1][j])) { j--; }
+        else { res.push({ char: sel[i-1], diff: true }); i--; }
+      }
+      return res.reverse().map(item => item.diff ? `<span class="text-red-500 font-bold">${item.char}</span>` : item.char).join('');
+    }
+
+    function initAgencyCarousel() {
+      carouselContainer.innerHTML = ''; carouselDotsContainer.innerHTML = ''; cardElements = [];
+      agencies.forEach(agency => {
+        const card = document.createElement('div');
+        card.dataset.id = agency.id;
+        card.className = 'agency-card w-[85%] shrink-0 snap-center cursor-grab select-none rounded-2xl p-4 flex items-center justify-between transition-all duration-300 bg-white border-2 border-transparent shadow-sm';
+        card.innerHTML = `
+          <div class="flex items-center gap-3 w-full">
+            <div class="agency-logo w-12 h-12 shrink-0 bg-stone-50 border border-stone-100 rounded-full flex items-center justify-center text-2xl shadow-sm transition-transform duration-300">${agency.logo}</div>
+            <div class="text-left w-full mt-0.5">
+              <div class="flex items-center justify-between mb-0.5">
+                 <p class="agency-label text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">${agency.label}</p>
+                 <span class="agency-rating text-[10px] text-stone-500 flex items-center gap-0.5 transition-colors duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-yellow-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${agency.rating}</span>
+              </div>
+              <p class="agency-name text-sm truncate transition-colors duration-300">${agency.name}</p>
+            </div>
+          </div>
+          <div class="relative flex items-center justify-end z-20"><button class="lock-btn p-2 -mr-2 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-90"></button></div>`;
+        const lockBtn = card.querySelector('.lock-btn');
+        lockBtn.addEventListener('click', (e) => { e.stopPropagation(); baseAgencyId = agency.id; updateCarouselVisuals(); updateAllUI(); });
+        card.addEventListener('click', () => { if (!isDragging) card.scrollIntoView({ behavior: 'smooth', inline: 'center' }); });
+        carouselContainer.appendChild(card); cardElements.push({ id: agency.id, element: card });
+        const dot = document.createElement('div'); dot.id = `dot-${agency.id}`; dot.className = 'transition-all duration-300 rounded-full bg-stone-300 h-1.5 w-1.5'; carouselDotsContainer.appendChild(dot);
+      });
+      updateCarouselVisuals(); updateAllUI();
+
+      let isDown = false, startX, scrollLeft;
+      carouselContainer.addEventListener('mousedown', (e) => { isDown = true; isDragging = false; startX = e.pageX - carouselContainer.offsetLeft; scrollLeft = carouselContainer.scrollLeft; });
+      carouselContainer.addEventListener('mouseleave', () => isDown = false);
+      carouselContainer.addEventListener('mouseup', () => isDown = false);
+      carouselContainer.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const walk = (e.pageX - carouselContainer.offsetLeft - startX) * 1.5; if (Math.abs(walk) > 5) isDragging = true; carouselContainer.scrollLeft = scrollLeft - walk; });
+      carouselContainer.addEventListener('scroll', () => {
+        const containerRect = carouselContainer.getBoundingClientRect(); const containerCenter = containerRect.left + containerRect.width / 2;
+        let closestId = selectedAgencyId, minDistance = Infinity;
+        cardElements.forEach(item => {
+          const cardCenter = item.element.getBoundingClientRect().left + item.element.getBoundingClientRect().width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+          if (distance < minDistance) { minDistance = distance; closestId = item.id; }
+        });
+        if (closestId !== selectedAgencyId) { selectedAgencyId = closestId; updateCarouselVisuals(); updateAllUI(); }
+      });
+    }
+
+    const formatNum = (num) => num.toLocaleString('en-US');
+
+    function updateAllUI() {
+      const sel = agencies.find(a => a.id === selectedAgencyId);
+      const base = agencies.find(a => a.id === baseAgencyId);
+      const selPrices = agencyPrices[selectedAgencyId];
+      const basePrices = agencyPrices[baseAgencyId];
+
+      const priceFields = [
+        { key: 'total', prefix: '' }, { key: 'transport', prefix: '' }, { key: 'accommodation', prefix: '' },
+        { key: 'activities', prefix: '' }, { key: 'service', prefix: '' }, { key: 'transport', prefix: 'detail-' },
+        { key: 'transportDaily', prefix: 'detail-' }, 
+        { key: 'h1n1', prefix: 'detail-' }, { key: 'h1n2', prefix: 'detail-' }, { key: 'h2n1', prefix: 'detail-' }
+      ];
+
+      priceFields.forEach(field => {
+        const priceEl = document.getElementById(`val-${field.prefix}${field.key}`);
+        if (priceEl) priceEl.textContent = formatNum(selPrices[field.key]);
+        const diffEl = document.getElementById(`diff-${field.prefix}${field.key}`);
+        if (diffEl) {
+          const diff = selPrices[field.key] - basePrices[field.key];
+          diffEl.className = `absolute right-0 text-[10px] font-bold transition-all duration-300 transform whitespace-nowrap ${field.key === 'total' && field.prefix === '' ? '-top-3 -right-12 text-sm' : '-top-3'}`;
+          if (diff === 0) diffEl.classList.add('opacity-0', 'translate-y-1');
+          else {
+            diffEl.textContent = diff > 0 ? `+${formatNum(diff)}` : `${formatNum(diff)}`;
+            diffEl.classList.add('opacity-100', 'translate-y-0', diff > 0 ? 'text-red-400' : 'text-emerald-500');
+          }
+        }
+      });
+
+      const serviceKeys = ['included', 'excluded', 'perks'];
+      serviceKeys.forEach(key => {
+        const textEl = document.getElementById(`text-${key}`);
+        const selVal = sel.services[key];
+        const baseVal = base.services[key];
+        if (selectedAgencyId !== baseAgencyId) textEl.innerHTML = getDiffHTML(selVal, baseVal).replace(/\n/g, '<br/>');
+        else textEl.innerHTML = selVal.replace(/\n/g, '<br/>');
+      });
+
+      const banner = document.getElementById('compare-banner');
+      const bannerName = document.getElementById('compare-agency-name');
+      if (selectedAgencyId !== baseAgencyId) {
+        bannerName.textContent = base.name;
+        banner.classList.remove('opacity-0', '-translate-y-4', 'pointer-events-none');
+        banner.classList.add('opacity-100', 'translate-y-0');
+      } else {
+        banner.classList.add('opacity-0', '-translate-y-4', 'pointer-events-none');
+        banner.classList.remove('opacity-100', 'translate-y-0');
+      }
+    }
+
+    function updateCarouselVisuals() {
+      cardElements.forEach(item => {
+        const isSel = item.id === selectedAgencyId, isBase = item.id === baseAgencyId;
+        const card = item.element, logo = card.querySelector('.agency-logo'), label = card.querySelector('.agency-label'), name = card.querySelector('.agency-name'), lockBtn = card.querySelector('.lock-btn'), dot = document.getElementById(`dot-${item.id}`), rating = card.querySelector('.agency-rating');
+        if (isSel) {
+          card.classList.add('border-stone-800', 'bg-stone-900', 'scale-[1.02]', 'opacity-100'); card.classList.remove('border-transparent', 'bg-white', 'opacity-60');
+          logo.classList.add('scale-110'); label.classList.add('text-[#d4af37]'); label.classList.remove('text-stone-400');
+          name.classList.add('font-bold', 'text-white'); name.classList.remove('font-medium', 'text-stone-700');
+          rating.classList.add('text-stone-300'); rating.classList.remove('text-stone-500');
+          if(dot) { dot.classList.add('w-4', 'bg-stone-800'); dot.classList.remove('w-1.5', 'bg-stone-300'); }
+        } else {
+          card.classList.remove('border-stone-800', 'bg-stone-900', 'scale-[1.02]', 'opacity-100'); card.classList.add('border-transparent', 'bg-white', 'opacity-60');
+          logo.classList.remove('scale-110'); label.classList.remove('text-[#d4af37]'); label.classList.add('text-stone-400');
+          name.classList.remove('font-bold', 'text-white'); name.classList.add('font-medium', 'text-stone-700');
+          rating.classList.remove('text-stone-300'); rating.classList.add('text-stone-500');
+          if(dot) { dot.classList.remove('w-4', 'bg-stone-800'); dot.classList.add('w-1.5', 'bg-stone-300'); }
+        }
+        lockBtn.innerHTML = isBase 
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="${isSel ? 'text-[#d4af37]' : 'text-stone-800'}"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="${isSel ? 'text-stone-400 hover:text-white' : 'text-stone-300 hover:text-stone-500'}"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+      });
+    }
+
+    initAgencyCarousel();
+
+    const viewAllBtn = document.getElementById('view-all-agencies-btn'), agencySheet = document.getElementById('agency-sheet'), sheetBackdrop = document.getElementById('agency-sheet-backdrop'), sheetContent = document.getElementById('agency-sheet-content'), closeSheetBtn = document.getElementById('close-agency-sheet'), sheetListContainer = document.getElementById('agency-list-sheet');
+    function renderAgencySheet() {
+      sheetListContainer.innerHTML = '';
+      agencies.forEach(agency => {
+        const isSel = agency.id === selectedAgencyId;
+        const btn = document.createElement('button');
+        btn.className = `w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${isSel ? 'border-stone-800 bg-stone-900 shadow-xl' : 'border-stone-100 bg-white hover:border-stone-200'}`;
+        btn.innerHTML = `<div class="flex items-center gap-4"><div class="w-12 h-12 bg-stone-50 border border-stone-100 rounded-full flex items-center justify-center text-2xl">${agency.logo}</div><div class="text-left"><p class="text-[10px] font-bold uppercase ${isSel ? 'text-[#d4af37]' : 'text-stone-400'}">${agency.label}</p><span class="text-sm ${isSel ? 'font-bold text-white' : 'font-medium text-stone-700'}">${agency.name}</span></div></div>${isSel ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[#d4af37]"><polyline points="20 6 9 17 4 12"/></svg>' : ''}`;
+        btn.addEventListener('click', () => { if (selectedAgencyId !== agency.id) { selectedAgencyId = agency.id; updateCarouselVisuals(); updateAllUI(); const target = cardElements.find(c => c.id === agency.id)?.element; if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'center' }); } setTimeout(closeSheet, 200); });
+        sheetListContainer.appendChild(btn);
+      });
+    }
+    const openSheet = () => { renderAgencySheet(); agencySheet.classList.remove('hidden'); void agencySheet.offsetWidth; sheetBackdrop.classList.remove('opacity-0'); sheetContent.classList.remove('translate-y-full'); };
+    const closeSheet = () => { sheetBackdrop.classList.add('opacity-0'); sheetContent.classList.add('translate-y-full'); setTimeout(() => agencySheet.classList.add('hidden'), 400); };
+    viewAllBtn.addEventListener('click', openSheet); closeSheetBtn.addEventListener('click', closeSheet); sheetBackdrop.addEventListener('click', closeSheet);
+    document.querySelectorAll('.collapsible-header').forEach(h => h.addEventListener('click', () => { const c = h.nextElementSibling, cv = h.querySelector('.chevron'); if (c.classList.contains('grid-rows-[1fr]')) { c.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]'); cv.classList.add('rotate-180'); } else { c.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]'); cv.classList.remove('rotate-180'); } }));
+  </script>
+</body>
+</html>

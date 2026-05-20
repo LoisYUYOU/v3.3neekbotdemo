@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeekBOT 聊天 UI 预览 - 动态报价编辑版</title>
+  <style>
+    :root {
+      /* 色彩系统 */
+      --v2-color-primary: #A67C52;
+      --v2-color-primary-light: #FDFAF3;
+      --v2-color-primary-dark: #8B6642;
+      --v2-color-accent: #C8956C;
+      --v2-color-link: #C5A059;
+      --v2-color-icon: #D5984F;
+      --v2-color-text-title: #1A1A1A;
+      --v2-color-text-primary: #291711;
+      --v2-color-text-secondary: #666666;
+      --v2-color-text-tertiary: #999999;
+      --v2-color-text-white: #FFFFFF;
+      --v2-color-bg-card: #FAFAFA;
+      --v2-color-bg-step: #F5EDE5;
+      --v2-color-bg-warm: #FBF5ED;
+      --v2-color-border: #E8E8E8;
+      --v2-color-success: #489957;
+      
+      /* 高奢暗黑主题色 */
+      --v2-dark-bg: #1C1A18;
+      --v2-dark-card: #262422;
+      --v2-dark-text-title: #F5EFEB;
+      --v2-dark-text-secondary: #B8B0A8;
+      --v2-dark-gold: #D4AF37;
+      --v2-dark-border: rgba(212, 175, 55, 0.2);
+
+      /* 字号系统 (按 375 屏幕缩放一半) */
+      --v2-font-size-xs: 10px;
+      --v2-font-size-sm: 12px;
+      --v2-font-size-base: 14px;
+      --v2-font-size-md: 16px;
+      --v2-font-size-lg: 18px;
+      --v2-font-size-xl: 20px;
+      --v2-font-size-xxl: 24px;
+
+      /* 字重系统 */
+      --v2-font-weight-regular: 400;
+      --v2-font-weight-medium: 500;
+      --v2-font-weight-semibold: 600;
+      --v2-font-weight-bold: 700;
+
+      /* 圆角系统 */
+      --v2-radius-sm: 4px;
+      --v2-radius-md: 6px;
+      --v2-radius-base: 8px;
+      --v2-radius-lg: 12px;
+      --v2-radius-xl: 16px;
+      --v2-radius-round: 9999px;
+
+      /* 间距系统 */
+      --v2-spacing-xs: 4px;
+      --v2-spacing-sm: 8px;
+      --v2-spacing-md: 12px;
+      --v2-spacing-lg: 16px;
+      --v2-spacing-l: 20px;
+      --v2-spacing-xl: 24px;
+
+      /* 阴影系统 */
+      --v2-shadow-sm: 0 1px 4px rgba(0,0,0,0.04);
+      --v2-shadow-card: 0 8px 24px rgba(166,124,82,0.12);
+    }
+
+    body {
+      background-color: #EBEBEB;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    }
+
+    /* 移动端设备框模拟 */
+    .device {
+      width: 375px;
+      height: 812px;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 8px solid #222;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 25px;
+      background: #222;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 100;
+    }
+
+    .chatPage {
+      flex: 1;
+      overflow-y: auto;
+      background: linear-gradient(180deg, var(--v2-color-bg-warm) 0%, var(--v2-color-primary-light) 50%, var(--v2-color-text-white) 100%);
+      padding-bottom: 120px;
+      scroll-behavior: smooth;
+    }
+
+    .chatPage::-webkit-scrollbar { display: none; }
+
+    .navBar {
+      position: sticky;
+      top: 0;
+      background: var(--v2-color-primary-light);
+      z-index: 10;
+      padding: 44px 16px 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .titleWrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .title {
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+      font-size: var(--v2-font-size-md);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--v2-color-primary);
+      font-size: var(--v2-font-size-xs);
+      font-weight: var(--v2-font-weight-medium);
+    }
+
+    .messageScroll {
+      padding: var(--v2-spacing-md) 0 20px;
+    }
+
+    .msg-wrapper {
+      padding: 0 var(--v2-spacing-lg);
+    }
+
+    /* === 🚀 画报风预算体验映射模块 === */
+    .richModuleItem {
+      margin: var(--v2-spacing-lg) 0 var(--v2-spacing-xl);
+    }
+    
+    .moduleHeader {
+      padding: 0 var(--v2-spacing-lg);
+      margin-bottom: var(--v2-spacing-md);
+    }
+    
+    .moduleTitle {
+      font-size: 20px;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+      letter-spacing: 1px;
+    }
+    
+    .moduleDesc {
+      font-size: var(--v2-font-size-xs);
+      color: var(--v2-color-text-tertiary);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .budgetCarousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding: 12px var(--v2-spacing-lg) 32px;
+      scroll-behavior: smooth;
+      cursor: grab;
+    }
+    .budgetCarousel:active { cursor: grabbing; }
+    .budgetCarousel::-webkit-scrollbar { display: none; }
+
+    .budgetCard {
+      flex: 0 0 82%; 
+      scroll-snap-align: center;
+      background: var(--v2-color-text-white);
+      border-radius: 20px;
+      box-shadow: var(--v2-shadow-card);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.3s ease;
+      overflow: hidden; 
+      min-height: 480px; 
+    }
+
+    .cardHero {
+      height: 180px;
+      background-color: var(--v2-color-bg-step);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--v2-spacing-md) var(--v2-spacing-lg);
+    }
+
+    .cardHero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.8) 100%);
+      z-index: 1;
+    }
+
+    .heroContent {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cardBadge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--v2-color-text-title);
+      padding: 4px 10px;
+      border-radius: var(--v2-radius-round);
+      font-size: 10px;
+      font-weight: var(--v2-font-weight-bold);
+      z-index: 2;
+      backdrop-filter: blur(4px);
+    }
+
+    .cardBadge--primary {
+      background: var(--v2-color-primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(166,124,82,0.4);
+    }
+
+    .cardTier {
+      font-size: var(--v2-font-size-xs);
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: var(--v2-font-weight-bold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .cardPrice {
+      font-size: 28px;
+      font-weight: 800;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      line-height: 1.1;
+    }
+
+    .cardBody {
+      padding: var(--v2-spacing-lg);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .cardVibe {
+      font-size: 15px;
+      color: var(--v2-color-text-primary);
+      font-family: "Georgia", "Times New Roman", serif;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: var(--v2-spacing-lg);
+      position: relative;
+    }
+    
+    .cardVibe::before {
+      content: '"';
+      color: var(--v2-color-primary-light);
+      font-size: 40px;
+      position: absolute;
+      top: -15px;
+      left: -8px;
+      z-index: -1;
+      font-family: sans-serif;
+    }
+
+    .cardMetrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 12px;
+      margin-bottom: var(--v2-spacing-xl);
+      padding-bottom: var(--v2-spacing-md);
+      border-bottom: 1px dashed var(--v2-color-border);
+    }
+
+    .metricItem {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metricLabel {
+      font-size: 9px;
+      color: var(--v2-color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metricValue {
+      font-size: var(--v2-font-size-sm);
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cardTradeoff {
+      background: var(--v2-color-bg-warm);
+      border-radius: var(--v2-radius-lg);
+      padding: 12px 14px;
+      margin-bottom: var(--v2-spacing-lg);
+      position: relative;
+      border-left: 3px solid var(--v2-color-primary);
+    }
+
+    .tradeoffSplit {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .tradeoffColumn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tradeoffTitle {
+      font-size: 10px;
+      color: var(--v2-color-primary-dark);
+      margin-bottom: 2px;
+      font-weight: var(--v2-font-weight-bold);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tradeoffText {
+      font-size: 11px;
+      color: var(--v2-color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .tradeoffItem {
+      font-size: 10px;
+      color: var(--v2-color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .cardCTA {
+      margin-top: auto;
+      width: 100%;
+      height: 44px;
+      border-radius: var(--v2-radius-round);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--v2-font-size-sm);
+      font-weight: var(--v2-font-weight-semibold);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+
+    .cta--primary {
+      background: var(--v2-color-primary);
+      color: var(--v2-color-text-white);
+      box-shadow: 0 4px 16px rgba(166,124,82,0.3);
+    }
+
+    .cta--secondary {
+      background: var(--v2-color-text-white);
+      color: var(--v2-color-text-title);
+      border: 1px solid var(--v2-color-border);
+    }
+
+    .budgetCard.is-highlight {
+      border: 2px solid var(--v2-color-primary);
+      box-shadow: 0 12px 32px rgba(166,124,82,0.25);
+      transform: scale(1.03);
+    }
+    
+    .budgetCard.is-highlight .cardHero::after {
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(166,124,82,0.4) 60%, rgba(41,23,17,0.9) 100%);
+    }
+
+    /* 暗黑主题 */
+    .budgetCard.theme-dark {
+      background: var(--v2-dark-card);
+      border: 1px solid var(--v2-dark-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .theme-dark .cardHero::after {
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 60%, var(--v2-dark-card) 100%);
+    }
+    .theme-dark .cardBadge {
+      background: rgba(0,0,0,0.6);
+      color: var(--v2-dark-gold);
+      border: 1px solid var(--v2-dark-gold);
+    }
+    .theme-dark .cardTier { color: var(--v2-dark-gold); }
+    .theme-dark .cardVibe { color: var(--v2-dark-text-title); }
+    .theme-dark .cardVibe::before { color: rgba(212, 175, 55, 0.1); }
+    .theme-dark .cardMetrics { border-bottom-color: rgba(255,255,255,0.1); }
+    .theme-dark .metricLabel { color: var(--v2-dark-text-secondary); }
+    .theme-dark .metricValue { color: var(--v2-dark-text-title); }
+    .theme-dark .cardTradeoff { 
+      background: rgba(212, 175, 55, 0.05); 
+      border-left-color: var(--v2-dark-gold); 
+    }
+    .theme-dark .tradeoffTitle { color: var(--v2-dark-gold); }
+    .theme-dark .tradeoffText, .theme-dark .tradeoffItem { color: var(--v2-dark-text-secondary); }
+    .theme-dark .cta--secondary {
+      background: transparent;
+      color: var(--v2-dark-gold);
+      border: 1px solid var(--v2-dark-border);
+    }
+    .theme-dark .cta--primary {
+      background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%);
+      color: #1A1A1A;
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+    }
+
+    .cardCTA.cta--disabled {
+      background: var(--v2-color-border) !important;
+      color: var(--v2-color-text-tertiary) !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+    }
+    .theme-dark .cardCTA.cta--disabled {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .composer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--v2-spacing-sm);
+      padding: var(--v2-spacing-md) var(--v2-spacing-lg) 26px;
+      background: var(--v2-color-text-white);
+      box-shadow: 0px -4px 32px rgba(41, 23, 17, 0.08);
+      z-index: 10;
+    }
+    .composerBox {
+      display: flex; align-items: flex-end; gap: var(--v2-spacing-sm); background: transparent;
+    }
+    .inputWrap {
+      flex: 1; min-height: 36px; padding: 8px var(--v2-spacing-md); border-radius: var(--v2-radius-lg); background: var(--v2-color-bg-step); display: flex; align-items: center;
+    }
+    .textarea {
+      width: 100%; border: none; background: transparent; outline: none; font-size: var(--v2-font-size-base); color: var(--v2-color-text-primary); resize: none; height: 20px;
+    }
+    .sendButton {
+      display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 36px; border-radius: var(--v2-radius-lg); background: var(--v2-color-primary); color: var(--v2-color-text-white); font-size: var(--v2-font-size-base); cursor: pointer;
+    }
+
+    /* 悬浮档案书签 */
+    #profileBookmarkContainer {
+      position: absolute;
+      top: 0;
+      left: 20px;
+      right: 20px;
+      transform: translateY(-100%); 
+      z-index: -1; 
+    }
+    #profileBookmarkContainer:empty {
+      display: none;
+    }
+    .profile-bookmark-wrapper {
+      background: var(--v2-color-text-white);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -8px 24px rgba(166,124,82,0.12);
+      border: 1px solid var(--v2-color-border);
+      border-bottom: none;
+      overflow: hidden;
+      position: relative;
+    }
+    .bookmark-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px 8px 12px;
+      border-bottom: 1px solid rgba(166,124,82,0.08);
+      background: #FAFAFA;
+    }
+    .bm-tabs-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+    .bm-tabs-wrapper::-webkit-scrollbar { display: none; }
+    
+    .bm-plan-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-tertiary);
+      cursor: pointer;
+      white-space: nowrap;
+      background: transparent;
+      border-radius: 16px; 
+      transition: all 0.2s ease;
+    }
+    .bm-plan-tab.active {
+      color: var(--v2-color-primary-dark);
+      background: rgba(166,124,82,0.12);
+    }
+    
+    .bm-plan-tab .delete-btn {
+      display: none; 
+      margin-left: 4px;
+      font-size: 14px;
+      color: var(--v2-color-text-tertiary);
+      line-height: 1;
+      width: 14px;
+      height: 14px;
+      text-align: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    .bm-plan-tab.active .delete-btn {
+      display: inline-block;
+      color: var(--v2-color-primary);
+    }
+    .bm-plan-tab.active .delete-btn:hover {
+      background: rgba(166,124,82,0.2);
+      color: var(--v2-color-primary-dark);
+    }
+
+    .bm-toggle-btn {
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: transparent; 
+      color: var(--v2-color-primary-dark); 
+    }
+    .tab-arrow {
+      font-size: 10px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .bookmark-content {
+      padding: 12px 16px 16px;
+      opacity: 1;
+      transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1), padding 0.4s ease, opacity 0.3s ease;
+      background: var(--v2-color-text-white);
+    }
+    .profile-bookmark-wrapper.collapsed .bookmark-content {
+      max-height: 0 !important;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bookmark-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+    }
+    .bm-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bm-label {
+      font-size: 10px;
+      color: var(--v2-color-text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+    .bm-val {
+      font-size: 13px;
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+    }
+
+    /* ⭐ 新增的可编辑元素样式 */
+    .edit-icon-svg {
+      width: 12px;
+      height: 12px;
+      color: var(--v2-color-primary);
+      opacity: 0.5;
+      margin-left: 4px;
+      vertical-align: text-top;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .edit-icon-svg:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      color: var(--v2-color-primary-dark);
+    }
+    .edit-area {
+      border-bottom: 1px dashed var(--v2-color-primary-dark);
+      padding: 0 2px;
+      min-width: 20px;
+      display: inline-block;
+      outline: none;
+      transition: all 0.2s ease;
+      border-radius: 2px;
+    }
+    .edit-area:focus {
+      background: rgba(166,124,82,0.1);
+      border-bottom-style: solid;
+      color: var(--v2-color-primary-dark);
+    }
+
+    .edit-date-input {
+      border: none;
+      border-bottom: 1px dashed var(--v2-color-primary-dark);
+      background: transparent;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      font-family: inherit;
+      padding: 0 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .edit-date-input:focus {
+      background: rgba(166,124,82,0.1);
+      border-bottom-style: solid;
+      color: var(--v2-color-primary-dark);
+    }
+
+    .bm-budget-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--v2-color-border);
+    }
+    .bm-budget-top .bm-val-large {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--v2-color-primary-dark);
+    }
+    .bm-hints {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--v2-color-border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+      font-size: 11px;
+      font-weight: var(--v2-font-weight-bold);
+    }
+    .bm-hint-pro { color: var(--v2-color-success); }
+    .bm-hint-con { color: #D9534F; }
+
+    .bm-quotes-header {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--v2-color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bm-quotes-title {
+      font-size: 11px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-secondary);
+    }
+    
+    .inline-quotes-list {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .inline-quote-card {
+      background: var(--v2-color-bg-warm);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(166,124,82,0.1);
+    }
+    .inline-quote-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .inline-quote-title {
+      font-size: 10px;
+      color: var(--v2-color-text-tertiary);
+    }
+    .inline-quote-subtitle {
+      font-size: 8px;
+      color: var(--v2-color-text-tertiary);
+      margin-left: 4px;
+      opacity: 0.8;
+    }
+    .inline-quote-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--v2-color-primary);
+    }
+    .inline-quote-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .inline-quote-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--v2-color-text-tertiary);
+      opacity: 0.6;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .inline-quote-delete:hover {
+      opacity: 1;
+      color: #D9534F;
+    }
+    .inline-quote-lock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--v2-color-text-tertiary);
+      opacity: 0.6;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .inline-quote-lock:hover {
+      opacity: 1;
+      color: var(--v2-color-primary-dark);
+    }
+    .inline-quote-lock.is-locked {
+      opacity: 1;
+      color: var(--v2-color-primary-dark);
+    }
+
+    /* 引导卡片 */
+    .introCard {
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 24px rgba(166,124,82,0.12);
+      border: 1px solid rgba(166, 124, 82, 0.12);
+      margin-bottom: 16px;
+    }
+    .introEyebrow {
+      color: rgba(166, 124, 82, 0.82);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+    }
+    .introStats {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .introStatItem {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .introStatItem::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 0;
+      width: 1px;
+      height: calc(100% - 8px);
+      background: rgba(166, 124, 82, 0.12);
+    }
+    .introStatItem:last-child::after {
+      display: none;
+    }
+    .introStatValue {
+      color: #291711;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .introStatLabel {
+      margin-top: 4px;
+      color: #999;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #qrOverlay {
+      align-items: center;
+      justify-content: center;
+    }
+    .modalContent {
+      background: var(--v2-color-text-white);
+      border-radius: var(--v2-radius-xl);
+      padding: 24px;
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    #qrOverlay.active .modalContent {
+      transform: scale(1);
+    }
+    .modalTitle {
+      font-size: var(--v2-font-size-lg);
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+      margin-bottom: 20px;
+    }
+    .qrImage {
+      width: 160px;
+      height: 160px;
+      margin-bottom: 16px;
+      border-radius: var(--v2-radius-md);
+      border: 1px solid var(--v2-color-border);
+      background: #F0F0F0;
+    }
+    .modalDesc {
+      font-size: var(--v2-font-size-sm);
+      color: var(--v2-color-text-secondary);
+      text-align: center;
+    }
+
+    #formOverlay {
+      align-items: flex-end;
+    }
+    .drawerContent {
+      background: var(--v2-color-text-white);
+      width: 100%;
+      border-radius: 24px 24px 0 0;
+      padding: 16px 24px 34px;
+      box-shadow: 0 -12px 32px rgba(0,0,0,0.12);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      max-height: 85%;
+      box-sizing: border-box;
+    }
+    #formOverlay.active .drawerContent {
+      transform: translateY(0);
+    }
+    .drawerIndicator {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: #E0E0E0;
+      margin: 0 auto 20px auto;
+    }
+    .drawerHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .drawerTitle {
+      font-size: var(--v2-font-size-lg);
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+    }
+    .closeBtn {
+      font-size: 26px;
+      color: var(--v2-color-text-tertiary);
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .closeBtn:hover {
+      color: var(--v2-color-text-title);
+    }
+    
+    .formScrollArea {
+      overflow-y: auto;
+      padding-right: 4px;
+      padding-bottom: 10px;
+    }
+    .formScrollArea::-webkit-scrollbar { width: 4px; }
+    .formScrollArea::-webkit-scrollbar-thumb { background: var(--v2-color-border); border-radius: 4px; }
+    
+    .formList {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .formItem {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
+    .formItem label {
+      width: 56px; 
+      flex-shrink: 0;
+      text-align: justify;
+      text-align-last: justify; 
+      font-size: 13px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+    }
+    .formItem input {
+      flex: 1; 
+      min-width: 0;
+      height: 40px; 
+      border-radius: 8px; 
+      background: var(--v2-color-text-white);
+      border: 1px solid var(--v2-color-border);
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+      color: var(--v2-color-text-primary);
+      box-sizing: border-box;
+    }
+    .formItem input:focus {
+      border-color: var(--v2-color-primary);
+      box-shadow: 0 0 0 3px rgba(166,124,82,0.12);
+    }
+    .formItem input[readonly] {
+      background: var(--v2-color-bg-step);
+      border-color: transparent;
+      color: var(--v2-color-text-secondary);
+      font-weight: var(--v2-font-weight-medium);
+    }
+    .budgetInputGroup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .budgetInputGroup input {
+      flex: 1;
+      width: 0; 
+      text-align: center;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-primary-dark);
+      padding: 0 4px;
+    }
+    .budgetSeparator {
+      color: var(--v2-color-text-secondary);
+      font-weight: var(--v2-font-weight-bold);
+    }
+    
+    .drawerSubmitBtn {
+      height: 44px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--v2-color-primary) 0%, var(--v2-color-primary-dark) 100%);
+      box-shadow: 0 6px 16px rgba(166,124,82,0.25);
+      margin-top: 16px;
+      font-size: 15px;
+      font-weight: var(--v2-font-weight-bold);
+      letter-spacing: 0.5px;
+      color: var(--v2-color-text-white);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .drawerSubmitBtn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 10px rgba(166,124,82,0.15);
+    }
+
+    .chat-msg-row {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+      padding: 0 var(--v2-spacing-lg);
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--v2-color-primary), var(--v2-color-primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; box-shadow: 0 4px 8px rgba(166,124,82,0.2);
+    }
+    .chat-bubble {
+      background: var(--v2-color-text-white);
+      padding: 12px 16px;
+      border-radius: 4px 16px 16px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      font-size: 14px;
+      color: var(--v2-color-text-title);
+      line-height: 1.5;
+      max-width: 75%;
+    }
+    .chat-btn {
+      display: block;
+      margin-top: 12px;
+      padding: 10px 0;
+      text-align: center;
+      background: var(--v2-color-bg-warm);
+      color: var(--v2-color-primary-dark);
+      border: 1px solid rgba(166,124,82,0.2);
+      border-radius: var(--v2-radius-lg);
+      font-weight: var(--v2-font-weight-bold);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chat-btn:active { transform: scale(0.98); background: var(--v2-color-primary-light); }
+
+    #quotePageOverlay {
+      background: #FAFAFA;
+      flex-direction: column;
+      z-index: 2000;
+    }
+    .quotePageNav {
+      height: 60px;
+      padding-top: 20px;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-bottom: 1px solid var(--v2-color-border);
+    }
+    .quotePageNav .backBtn {
+      position: absolute;
+      left: 16px;
+      bottom: 12px;
+      font-size: 14px;
+      color: var(--v2-color-primary-dark);
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .quotePageNav .title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--v2-color-text-title);
+      position: absolute;
+      bottom: 12px;
+    }
+    .quotePageBlank {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--v2-color-text-tertiary);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="device">
+    <div class="notch"></div>
+    
+    <div class="chatPage" id="chatPage">
+      <div class="navBar">
+        <div class="titleWrap">
+          <div class="title">NeekBOT</div>
+          <div class="subtitle">基于10000+真实行程训练生成</div>
+        </div>
+      </div>
+      
+      <div class="messageScroll" id="scrollArea">
+        <div class="msg-wrapper">
+          <div class="introCard">
+            <div class="introEyebrow">NEEKBOT</div>
+            <div class="introStats">
+              <div class="introStatItem">
+                <div class="introStatValue">10000+</div>
+                <div class="introStatLabel">真实行程</div>
+              </div>
+              <div class="introStatItem">
+                <div class="introStatValue">1000+</div>
+                <div class="introStatLabel">服务客户</div>
+              </div>
+              <div class="introStatItem">
+                <div class="introStatValue">10年</div>
+                <div class="introStatLabel">地接经验</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="richModuleItem">
+          <div class="moduleHeader">
+            <div class="moduleTitle">Quick Match</div>
+            <div class="moduleDesc">左右滑动看看不同预算下的非洲体验会是什么样的？</div>
+          </div>
+          
+          <div class="budgetCarousel" id="budgetCarousel">
+            
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./1500.jpg');">
+                <div class="heroContent">
+                  <div class="cardTier">特种兵王</div>
+                  <div class="cardPrice">$400-$1,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">极限穷游 · 硬核吃苦</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">3-5天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">6-8人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">老旧租赁-改装面包车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">经济营地(限电网)</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">年轻体力好的背包客</div>
+                      <div class="tradeoffItem">能吃苦、不挑剔吃住</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">落地拼团随机组队</div>
+                      <div class="tradeoffItem">车子老旧陷车风险高</div>
+                      <div class="tradeoffItem">景点间更换车和向导</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openQR()">立即参团</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./1500-2200.jpg');">
+                <div class="cardBadge">🥉12-15%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">入门打卡</div>
+                  <div class="cardPrice">$1,500-2,200</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">车内拥挤 · 行程紧凑</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">3-7天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">6-7人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">老旧租赁-陆地巡航舰</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">经济帐篷/市区酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">看重“去过”而非体验</div>
+                      <div class="tradeoffItem">首次非洲行，预算有限</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">人多车内空间拥挤</div>
+                      <div class="tradeoffItem">行程较紧赶路较多</div>
+                      <div class="tradeoffItem">住宿和用餐较基础</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$1,500', '$2,200', '入门方案（打卡型）')">定制入门方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard is-highlight" id="highlightCard">
+              <div class="cardHero" style="background-image: url('./2200-2800.png');">
+                <div class="cardBadge cardBadge--primary">⬆🥇 45-50%选择！</div>
+                <div class="heroContent">
+                  <div class="cardTier">经典之选</div>
+                  <div class="cardPrice">$2,200-2,800</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">舒适均衡 · 最高性价比</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">5-8天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">4-6人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">地接自有-全险陆巡</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">园区内舒适住宿</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想要完整体验Safari</div>
+                      <div class="tradeoffItem">希望价格和体验均衡</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">能自己组搭子</div>
+                      <div class="tradeoffItem">总赶路距离较长</div>
+                      <div class="tradeoffItem">行程节奏偏“旅游型”</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--primary" onclick="openForm('$2,200', '$2,800', '经典方案（均衡型）')">定制经典方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./2800-3500.png');">
+                <div class="cardBadge">🥈20-25%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">深度体验</div>
+                  <div class="cardPrice">$2,800-3,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">从容轻松 · 沉浸自然</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-9天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">2-4人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">地接全险-崭新陆巡</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">园区内景观酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想看到更多动物</div>
+                      <div class="tradeoffItem">不想赶路希望节奏轻松</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">仍以陆地交通为主</div>
+                      <div class="tradeoffItem">部分路段车程较长</div>
+                      <div class="tradeoffItem">价格明显高于基础款</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$2,800', '$3,500', '深度方案（沉浸型）')">定制深度方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./3500-4500.png');">
+                <div class="cardBadge">10-12%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">小资轻奢</div>
+                  <div class="cardPrice">$3,500-4,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">体验私密 · 活动丰富</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-9天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-4人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">崭新陆巡+内陆飞机</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">核心区景观酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">情侣 / 度假型出行</div>
+                      <div class="tradeoffItem">想要舒适私密的酒店</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">小飞机20kg行李限额</div>
+                      <div class="tradeoffItem">酒店spa和活动需预约</div>
+                      <div class="tradeoffItem">睡觉会被动物叫声打扰</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$3,500', '$4,500', '轻奢方案（私密型）')">定制轻奢方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard theme-dark">
+              <div class="cardHero" style="background-image: url('./4500-7000.png');">
+                <div class="cardBadge">10-12%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">奢华进阶</div>
+                  <div class="cardPrice">$4,500-7,000</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">独享资源 · 草原电视机</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-15天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-4人</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">内陆飞机+敞篷游猎车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">私保内野奢酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">对住宿和体验高要求</div>
+                      <div class="tradeoffItem">想要刺激的游猎体验</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">基本没有外部社交</div>
+                      <div class="tradeoffItem">酒店至少提前半年预定</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--primary" onclick="openForm('$4,500', '$7,000', '奢华方案（独享型）')">定制奢华方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard theme-dark">
+              <div class="cardHero" style="background-image: url('./7000 +.png');">
+                <div class="cardBadge">隐秘奢享 (稀有)</div>
+                <div class="heroContent">
+                  <div class="cardTier">顶级定制</div>
+                  <div class="cardPrice">$7,500+</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">私人管家 · 动物零距离</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">5-20天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-2人</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">直升机+私人游猎车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">私保内管家式野奢</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">追求完全私密性</div>
+                      <div class="tradeoffItem">超近距离动物接触</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">酒店非常稀缺</div>
+                      <div class="tradeoffItem">存在动物风险</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openQR()">联系专属顾问</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 聊天记录插入区域 -->
+        <div id="chatHistory"></div>
+
+      </div>
+    </div>
+
+    <!-- 底部输入区 -->
+    <div class="composer">
+      <div id="profileBookmarkContainer"></div>
+      <div class="composerBox">
+        <div class="inputWrap">
+          <input type="text" class="textarea" id="chatInput" placeholder="告诉 NeekBot 你的想法..." autocomplete="off"/>
+        </div>
+        <div class="sendButton" id="sendBtn">发送</div>
+      </div>
+    </div>
+
+    <!-- 二维码居中弹窗 -->
+    <div id="qrOverlay" class="overlay" onclick="closeQR(event)">
+      <div class="modalContent">
+        <div class="modalTitle">添加专属顾问</div>
+        <img src="https://placehold.co/160x160/cccccc/ffffff?text=QR+Code" alt="QR Code" class="qrImage">
+        <div class="modalDesc">长按扫码添加微信</div>
+      </div>
+    </div>
+
+    <!-- 定制需求底部抽屉 -->
+    <div id="formOverlay" class="overlay" onclick="closeDrawer(event)">
+      <div class="drawerContent">
+        <div class="drawerIndicator"></div>
+        <div class="drawerHeader">
+          <span class="drawerTitle">填写定制需求</span>
+          <span class="closeBtn" onclick="closeDrawer()">&times;</span>
+        </div>
+        
+        <div class="formScrollArea">
+          <div class="formList">
+            <div class="formItem">
+              <label>昵称</label>
+              <input type="text" id="f_nickname" placeholder="非必填，默认为 chatid">
+            </div>
+            <div class="formItem">
+              <label>目的地</label>
+              <input type="text" id="f_destination" value="肯尼亚" readonly>
+            </div>
+            <div class="formItem">
+              <label>出发日期</label>
+              <input type="date" id="f_date">
+            </div>
+            <div class="formItem">
+              <label>人数</label>
+              <input type="number" id="f_people" placeholder="请输入出行人数">
+            </div>
+            <div class="formItem">
+              <label>天数</label>
+              <input type="number" id="f_days" placeholder="请输入游玩天数">
+            </div>
+            <div class="formItem">
+              <label>预算区间</label>
+              <div class="budgetInputGroup">
+                <input type="text" id="f_budget_min" placeholder="最低">
+                <span class="budgetSeparator">-</span>
+                <input type="text" id="f_budget_max" placeholder="最高">
+              </div>
+            </div>
+            
+            <button class="drawerSubmitBtn" onclick="submitForm()">提交需求</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空白报价单页面 -->
+    <div id="quotePageOverlay" class="overlay">
+      <div class="quotePageNav">
+        <div class="backBtn" onclick="closeQuotePage()">❮ 返回</div>
+        <div class="title">专属报价单</div>
+      </div>
+      <div class="quotePageBlank">
+        <svg fill="currentColor" viewBox="0 0 24 24" width="48" height="48" style="margin-bottom:12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2.5L17.5 9H13V4.5zM6 20V4h5v6h6v10H6z"/></svg>
+        <p>（详细报价页面正在生成中...）</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const budgetCarousel = document.getElementById('budgetCarousel');
+      setTimeout(() => {
+        if(budgetCarousel) {
+          const highlightCard = document.getElementById('highlightCard');
+          if(highlightCard) {
+            highlightCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
+        }
+      }, 300);
+
+      // 卡片横向滑动逻辑
+      if (budgetCarousel) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        budgetCarousel.addEventListener('mousedown', (e) => {
+          isDown = true;
+          startX = e.pageX - budgetCarousel.offsetLeft;
+          scrollLeft = budgetCarousel.scrollLeft;
+          budgetCarousel.style.scrollSnapType = 'none';
+          budgetCarousel.style.scrollBehavior = 'auto';
+        });
+        budgetCarousel.addEventListener('mouseleave', () => {
+          if (!isDown) return;
+          isDown = false;
+          budgetCarousel.style.scrollSnapType = 'x mandatory';
+          budgetCarousel.style.scrollBehavior = 'smooth';
+        });
+        budgetCarousel.addEventListener('mouseup', () => {
+          if (!isDown) return;
+          isDown = false;
+          budgetCarousel.style.scrollSnapType = 'x mandatory';
+          budgetCarousel.style.scrollBehavior = 'smooth';
+        });
+        budgetCarousel.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - budgetCarousel.offsetLeft;
+          const walk = (x - startX) * 1.5; 
+          budgetCarousel.scrollLeft = scrollLeft - walk;
+        });
+      }
+    });
+
+    let currentPlanName = '专属定制方案';
+
+    function openQR() { document.getElementById('qrOverlay').classList.add('active'); }
+    function closeQR(e) {
+      if (e && e.target !== document.getElementById('qrOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('qrOverlay').classList.remove('active');
+    }
+
+    function openForm(minStr = '', maxStr = '', planName = '专属定制方案') {
+      currentPlanName = planName;
+      document.getElementById('f_budget_min').value = minStr;
+      document.getElementById('f_budget_max').value = maxStr;
+      document.getElementById('formOverlay').classList.add('active');
+    }
+    function closeDrawer(e) {
+      if (e && e.target !== document.getElementById('formOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('formOverlay').classList.remove('active');
+    }
+
+    let plansData = []; 
+    let activePlanIndex = 0; 
+    let isCollapsed = true;
+    let pendingQuotePlanIndex = -1; 
+    let lockedQuoteId = null; 
+
+    function updatePlanButtonsState() {
+      const buttons = document.querySelectorAll('.cardCTA');
+      const currentPlanNames = plansData.map(p => p.planName);
+      const isFull = plansData.length >= 3;
+
+      buttons.forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes('openQR()')) return; 
+
+        let isAdded = false;
+        for (let name of currentPlanNames) {
+          if (onclickAttr.includes(name)) {
+            isAdded = true;
+            break;
+          }
+        }
+        if (isAdded || isFull) {
+          btn.classList.add('cta--disabled');
+        } else {
+          btn.classList.remove('cta--disabled');
+        }
+      });
+    }
+
+    function submitForm() {
+      const dest = document.getElementById('f_destination').value || '未填';
+      const date = document.getElementById('f_date').value || '未定';
+      const people = document.getElementById('f_people').value || '-';
+      const days = document.getElementById('f_days').value || '-';
+      const min = document.getElementById('f_budget_min').value || '0';
+      const max = document.getElementById('f_budget_max').value || '0';
+
+      let proText = "体验优质", conText = "需合理安排时间";
+      if (currentPlanName.includes("入门")) { proText = "价格便宜，覆盖经典"; conText = "车内拥挤，行程较赶"; }
+      else if (currentPlanName.includes("经典")) { proText = "性价比高，体验均衡"; conText = "赶路较长，节奏偏快"; }
+      else if (currentPlanName.includes("深度")) { proText = "节奏轻松，沉浸自然"; conText = "价格偏高，部分车程长"; }
+      else if (currentPlanName.includes("轻奢")) { proText = "体验私密，活动丰富"; conText = "小飞机限重严格"; }
+      else if (currentPlanName.includes("奢华")) { proText = "独享资源，顶级视野"; conText = "需提前半年预定"; }
+
+      // ⭐ 将表单数据统一打包为 params 结构
+      const params = { destination: dest, date, people, days, min, max };
+
+      let existingIndex = plansData.findIndex(p => p.planName === currentPlanName);
+
+      if (existingIndex !== -1) {
+          plansData[existingIndex] = { ...plansData[existingIndex], params, proText, conText };
+          activePlanIndex = existingIndex;
+      } else {
+          if (plansData.length >= 3) {
+              appendChatBubble("最多只能添加 3 种对比方案哦！");
+              closeDrawer();
+              return;
+          }
+          plansData.push({
+              planName: currentPlanName,
+              params: params, proText, conText,
+              quotes: [] 
+          });
+          activePlanIndex = plansData.length - 1;
+      }
+
+      isCollapsed = true; 
+      renderBookmarkUI();
+      closeDrawer();
+      updatePlanButtonsState();
+
+      appendChatBubble(`${currentPlanName} 基础信息已记录。`, true, activePlanIndex);
+    }
+
+    function renderBookmarkUI() {
+      const container = document.getElementById('profileBookmarkContainer');
+      if(plansData.length === 0) {
+          container.innerHTML = '';
+          return;
+      }
+
+      const activePlan = plansData[activePlanIndex];
+
+      let tabsHtml = '';
+      plansData.forEach((p, idx) => {
+          const isActive = idx === activePlanIndex ? 'active' : '';
+          const deleteHtml = isActive ? `<span class="delete-btn" onclick="deletePlan(event, ${idx})">&times;</span>` : '';
+          tabsHtml += `<div class="bm-plan-tab ${isActive}" onclick="switchPlanTab(event, ${idx})">${p.planName}${deleteHtml}</div>`;
+      });
+
+      // ⭐ 核心逻辑：确定当前显示的各项基础参数
+      // 优先显示被 Lock（锁定）的报价单数据，如果没有锁定，则显示最新生成的报价单数据（[0]）
+      let displayQuote = null;
+      if (activePlan.quotes.length > 0) {
+        displayQuote = activePlan.quotes.find(q => q.id === lockedQuoteId) || activePlan.quotes[0];
+      }
+      
+      // 直接提取对应层级的统一 params
+      let displayParams = displayQuote ? displayQuote.params : activePlan.params;
+
+      let quotesHtml = '';
+      if (activePlan.quotes.length > 0) {
+        quotesHtml = '<div class="inline-quotes-list">';
+        activePlan.quotes.forEach(q => {
+          let isLocked = lockedQuoteId === q.id;
+          let lockClass = isLocked ? 'is-locked' : '';
+          let lockSvg = isLocked 
+            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>` 
+            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+
+          let deleteSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`;
+
+          // ⭐ 列表中附加该报价单生成时的历史参数快照以便区分
+          quotesHtml += `
+            <div class="inline-quote-card">
+              <div class="inline-quote-left">
+                <span class="inline-quote-title">报价单号 #${q.id} <span class="inline-quote-subtitle">(${q.params.date} · ${q.params.people}人 · ${q.params.days}天)</span></span>
+                <div class="inline-quote-price">${q.price}</div>
+              </div>
+              <div class="inline-quote-actions">
+                <div class="inline-quote-lock ${lockClass}" title="专门针对当前报价修改" onclick="toggleLock(event, '${q.id}')">
+                  ${lockSvg}
+                </div>
+                <div class="inline-quote-delete" title="删除此报价" onclick="deleteQuote(event, '${q.id}')">
+                  ${deleteSvg}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        quotesHtml += '</div>';
+      }
+
+      // ⭐ 将数据区域替换为带有 Icon 的可编辑结构
+      const editIcon = `<svg class="edit-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="点击数值修改"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+
+      let contentHtml = `
+        <div class="bm-budget-top">
+          <span class="bm-label">预算区间</span>
+          <span class="bm-val-large">${displayParams.min} - ${displayParams.max}</span>
+        </div>
+        <div class="bookmark-grid">
+          <div class="bm-item">
+            <span class="bm-label">目的地</span>
+            <span class="bm-val">${displayParams.destination}</span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">出发日期${editIcon}</span>
+            <span class="bm-val"><input type="date" class="edit-date-input" data-field="date" value="${displayParams.date}" onchange="handleProfileEdit(event)" /></span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">出行人数${editIcon}</span>
+            <span class="bm-val"><span class="edit-area" contenteditable="true" data-field="people" onblur="handleProfileEdit(event)" onkeydown="handleKeydown(event)">${displayParams.people}</span>人</span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">游玩天数${editIcon}</span>
+            <span class="bm-val"><span class="edit-area" contenteditable="true" data-field="days" onblur="handleProfileEdit(event)" onkeydown="handleKeydown(event)">${displayParams.days}</span>天</span>
+          </div>
+        </div>
+        <div class="bm-hints">
+          <span class="bm-hint-pro">✔ ${activePlan.proText}</span>
+          <span class="bm-hint-con">✖ ${activePlan.conText}</span>
+        </div>
+        <div class="bm-quotes-header">
+          <span class="bm-quotes-title">历史报价</span>
+        </div>
+        ${quotesHtml}
+      `;
+
+      const collapseClass = isCollapsed ? 'collapsed' : '';
+      const arrowRot = isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+
+      container.innerHTML = `
+        <div class="profile-bookmark-wrapper ${collapseClass}">
+          <div class="bookmark-header">
+            <div class="bm-tabs-wrapper">${tabsHtml}</div>
+            <div class="bm-toggle-btn" onclick="toggleBookmark()">
+                <span class="tab-arrow" style="transform: ${arrowRot};">▲</span>
+            </div>
+          </div>
+          <div class="bookmark-content" style="max-height: ${isCollapsed ? '0' : '400px'}; overflow-y: auto;">
+            ${contentHtml}
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const activeTab = container.querySelector('.bm-plan-tab.active');
+        if (activeTab) {
+          activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 50);
+    }
+
+    function handleKeydown(e) {
+      // 阻止回车换行，直接触发 blur 保存
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.target.blur();
+      }
+    }
+
+    function handleProfileEdit(e) {
+      const el = e.target;
+      const field = el.getAttribute('data-field');
+      let newValue = el.tagName === 'INPUT' ? el.value : el.innerText.trim().replace(/\n/g, ''); 
+      const activePlan = plansData[activePlanIndex];
+
+      if (!activePlan) return;
+
+      // 寻找当前作为基准显示的报价单快照参数
+      let displayQuote = null;
+      if (activePlan.quotes.length > 0) {
+        displayQuote = activePlan.quotes.find(q => q.id === lockedQuoteId) || activePlan.quotes[0];
+      }
+
+      let baseParams = displayQuote ? displayQuote.params : activePlan.params;
+      let oldVal = baseParams[field];
+
+      // 如果没有任何修改，或者被清空，则恢复旧值
+      if (!newValue || newValue === oldVal) {
+        el.innerText = oldVal;
+        return;
+      }
+
+      // ========= 产生了有效修改，触发新报价生成 =========
+      
+      // 合并产生一份全新的参数结构快照
+      const newParams = { ...baseParams, [field]: newValue };
+      const priceStr = generatePriceForPlan(newParams);
+
+      const newQuote = {
+        id: Date.now().toString().slice(-4),
+        price: priceStr,
+        params: newParams
+      };
+
+      // 插入顶部并自动转移锁
+      activePlan.quotes.unshift(newQuote);
+      lockedQuoteId = newQuote.id;
+
+      // 在聊天流里给用户反馈
+      let fieldName = field === 'date' ? '出发日期' : field === 'people' ? '出行人数' : field === 'days' ? '游玩天数' : '目的地';
+      appendChatBubble(`收到！您将 ${fieldName} 调整为了 <b>${newValue}</b>。系统已实时为您核算了最新报价单，锁已自动移至最新报价哦~`);
+
+      // 重新渲染
+      renderBookmarkUI();
+    }
+
+    // 根据参数动态计算价格
+    function generatePriceForPlan(params) {
+        const min = parseInt(params.min.replace(/[^0-9]/g, '') || 0);
+        const max = parseInt(params.max.replace(/[^0-9]/g, '') || 0);
+        let priceNum = 0;
+        if(min && max) priceNum = Math.floor(Math.random() * (max - min + 1)) + min;
+        else if(min) priceNum = min + Math.floor(Math.random() * 500);
+        else priceNum = 2000 + Math.floor(Math.random() * 1000);
+        return '$' + priceNum.toLocaleString();
+    }
+
+    function toggleBookmark() {
+      isCollapsed = !isCollapsed;
+      renderBookmarkUI();
+    }
+
+    function switchPlanTab(e, idx) {
+      e.stopPropagation();
+      activePlanIndex = idx;
+      isCollapsed = false; 
+      renderBookmarkUI();
+    }
+
+    function toggleLock(e, quoteId) {
+        e.stopPropagation();
+        if (lockedQuoteId === quoteId) {
+            lockedQuoteId = null; 
+        } else {
+            lockedQuoteId = quoteId; 
+        }
+        renderBookmarkUI();
+    }
+
+    function deleteQuote(e, quoteId) {
+        e.stopPropagation();
+        const activePlan = plansData[activePlanIndex];
+        activePlan.quotes = activePlan.quotes.filter(q => q.id !== quoteId);
+        if (lockedQuoteId === quoteId) {
+            lockedQuoteId = null;
+        }
+        renderBookmarkUI();
+    }
+
+    function deletePlan(e, idx) {
+        e.stopPropagation(); 
+        plansData.splice(idx, 1);
+        if (plansData.length === 0) {
+            activePlanIndex = 0;
+            isCollapsed = true;
+            document.getElementById('profileBookmarkContainer').innerHTML = '';
+        } else {
+            if (activePlanIndex >= plansData.length) activePlanIndex = plansData.length - 1; 
+            renderBookmarkUI();
+        }
+        updatePlanButtonsState();
+    }
+
+    function openQuotePage(planIndex, btnNode) {
+        if(btnNode) {
+             btnNode.innerText = '已查看';
+             btnNode.style.pointerEvents = 'none';
+             btnNode.style.opacity = '0.6';
+        }
+        pendingQuotePlanIndex = planIndex;
+        document.getElementById('quotePageOverlay').classList.add('active');
+    }
+
+    function closeQuotePage() {
+        document.getElementById('quotePageOverlay').classList.remove('active');
+
+        if (pendingQuotePlanIndex !== -1) {
+            const plan = plansData[pendingQuotePlanIndex];
+            
+            const priceStr = generatePriceForPlan(plan.params);
+            
+            // ⭐ 初始报价完整继承基础参数的快照
+            const q = { 
+                id: Date.now().toString().slice(-4), 
+                price: priceStr,
+                params: { ...plan.params }
+            };
+            
+            plan.quotes.unshift(q); 
+            // 首次产生报价也自动上锁
+            lockedQuoteId = q.id;
+
+            activePlanIndex = pendingQuotePlanIndex; 
+            isCollapsed = false; 
+            renderBookmarkUI();
+            
+            appendChatBubble(`新生成的报价单已同步到您的出行档案卡中！如果后续行程人数或天数有变，您可以直接在上方卡片点击数值进行修改，我会实时更新报价。`);
+            pendingQuotePlanIndex = -1;
+        }
+    }
+
+    function appendChatBubble(text, showQuoteBtn = false, planIndex = 0) {
+      const scrollArea = document.getElementById('chatHistory');
+      let btnHtml = '';
+      if (showQuoteBtn) {
+          btnHtml = `<div class="chat-btn" onclick="openQuotePage(${planIndex}, this)">查看详细报价单</div>`;
+      }
+      
+      const html = `
+        <div class="chat-msg-row">
+          <div class="chat-avatar">N</div>
+          <div class="chat-bubble">
+            ${text}
+            ${btnHtml}
+          </div>
+        </div>
+      `;
+      scrollArea.insertAdjacentHTML('beforeend', html);
+      
+      const chatPage = document.getElementById('chatPage');
+      chatPage.scrollTo({
+        top: chatPage.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  </script>
+</body>
+</html>
