@@ -1,0 +1,2963 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeekBOT 聊天与报价完整流程</title>
+  
+  <!-- 引入 Tailwind CSS (供报价页面使用) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ========================================= */
+    /* ======== Bot 聊天界面的原生 CSS ======== */
+    /* ========================================= */
+    :root {
+      /* 色彩系统 */
+      --v2-color-primary: #A67C52;
+      --v2-color-primary-light: #FDFAF3;
+      --v2-color-primary-dark: #8B6642;
+      --v2-color-accent: #C8956C;
+      --v2-color-link: #C5A059;
+      --v2-color-icon: #D5984F;
+      --v2-color-text-title: #1A1A1A;
+      --v2-color-text-primary: #291711;
+      --v2-color-text-secondary: #666666;
+      --v2-color-text-tertiary: #999999;
+      --v2-color-text-white: #FFFFFF;
+      --v2-color-bg-card: #FAFAFA;
+      --v2-color-bg-step: #F5EDE5;
+      --v2-color-bg-warm: #FBF5ED;
+      --v2-color-border: #E8E8E8;
+      --v2-color-success: #489957;
+      
+      /* 高奢暗黑主题色 */
+      --v2-dark-bg: #1C1A18;
+      --v2-dark-card: #262422;
+      --v2-dark-text-title: #F5EFEB;
+      --v2-dark-text-secondary: #B8B0A8;
+      --v2-dark-gold: #D4AF37;
+      --v2-dark-border: rgba(212, 175, 55, 0.2);
+
+      /* 字号系统 */
+      --v2-font-size-xs: 10px;
+      --v2-font-size-sm: 12px;
+      --v2-font-size-base: 14px;
+      --v2-font-size-md: 16px;
+      --v2-font-size-lg: 18px;
+      --v2-font-size-xl: 20px;
+      --v2-font-size-xxl: 24px;
+
+      /* 字重系统 */
+      --v2-font-weight-regular: 400;
+      --v2-font-weight-medium: 500;
+      --v2-font-weight-semibold: 600;
+      --v2-font-weight-bold: 700;
+
+      /* 圆角系统 */
+      --v2-radius-sm: 4px;
+      --v2-radius-md: 6px;
+      --v2-radius-base: 8px;
+      --v2-radius-lg: 12px;
+      --v2-radius-xl: 16px;
+      --v2-radius-round: 9999px;
+
+      /* 间距系统 */
+      --v2-spacing-xs: 4px;
+      --v2-spacing-sm: 8px;
+      --v2-spacing-md: 12px;
+      --v2-spacing-lg: 16px;
+      --v2-spacing-l: 20px;
+      --v2-spacing-xl: 24px;
+
+      /* 阴影系统 */
+      --v2-shadow-sm: 0 1px 4px rgba(0,0,0,0.04);
+      --v2-shadow-card: 0 8px 24px rgba(166,124,82,0.12);
+    }
+
+    body {
+      background-color: #EBEBEB;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    }
+
+    /* 移动端设备框模拟 */
+    .device {
+      width: 375px;
+      height: 812px;
+      background: white;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 8px solid #222;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 25px;
+      background: #222;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 100;
+    }
+
+    .chatPage {
+      flex: 1;
+      overflow-y: auto;
+      background: linear-gradient(180deg, var(--v2-color-bg-warm) 0%, var(--v2-color-primary-light) 50%, var(--v2-color-text-white) 100%);
+      padding-bottom: 120px;
+      scroll-behavior: smooth;
+    }
+
+    .chatPage::-webkit-scrollbar { display: none; }
+
+    .navBar {
+      position: sticky;
+      top: 0;
+      background: var(--v2-color-primary-light);
+      z-index: 10;
+      padding: 44px 16px 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .titleWrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .title {
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+      font-size: var(--v2-font-size-md);
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--v2-color-primary);
+      font-size: var(--v2-font-size-xs);
+      font-weight: var(--v2-font-weight-medium);
+    }
+
+    .messageScroll {
+      padding: var(--v2-spacing-md) 0 20px;
+    }
+
+    .msg-wrapper {
+      padding: 0 var(--v2-spacing-lg);
+    }
+
+    /* === 🚀 画报风预算体验映射模块 === */
+    .richModuleItem {
+      margin: var(--v2-spacing-lg) 0 var(--v2-spacing-xl);
+    }
+    
+    .moduleHeader {
+      padding: 0 var(--v2-spacing-lg);
+      margin-bottom: var(--v2-spacing-md);
+    }
+    
+    .moduleTitle {
+      font-size: 20px;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+      letter-spacing: 1px;
+    }
+    
+    .moduleDesc {
+      font-size: var(--v2-font-size-xs);
+      color: var(--v2-color-text-tertiary);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .budgetCarousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding: 12px var(--v2-spacing-lg) 32px;
+      scroll-behavior: smooth;
+      cursor: grab;
+    }
+    .budgetCarousel:active { cursor: grabbing; }
+    .budgetCarousel::-webkit-scrollbar { display: none; }
+
+    .budgetCard {
+      flex: 0 0 82%; 
+      scroll-snap-align: center;
+      background: var(--v2-color-text-white);
+      border-radius: 20px;
+      box-shadow: var(--v2-shadow-card);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.3s ease;
+      overflow: hidden; 
+      min-height: 480px; 
+    }
+
+    .cardHero {
+      height: 180px;
+      background-color: var(--v2-color-bg-step);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--v2-spacing-md) var(--v2-spacing-lg);
+    }
+
+    .cardHero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.8) 100%);
+      z-index: 1;
+    }
+
+    .heroContent {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cardBadge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--v2-color-text-title);
+      padding: 4px 10px;
+      border-radius: var(--v2-radius-round);
+      font-size: 10px;
+      font-weight: var(--v2-font-weight-bold);
+      z-index: 2;
+      backdrop-filter: blur(4px);
+    }
+
+    .cardBadge--primary {
+      background: var(--v2-color-primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(166,124,82,0.4);
+    }
+
+    .cardTier {
+      font-size: var(--v2-font-size-xs);
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: var(--v2-font-weight-bold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .cardPrice {
+      font-size: 28px;
+      font-weight: 800;
+      color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      line-height: 1.1;
+    }
+
+    .cardBody {
+      padding: var(--v2-spacing-lg);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .cardVibe {
+      font-size: 15px;
+      color: var(--v2-color-text-primary);
+      font-family: "Georgia", "Times New Roman", serif;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: var(--v2-spacing-lg);
+      position: relative;
+    }
+    
+    .cardVibe::before {
+      content: '"';
+      color: var(--v2-color-primary-light);
+      font-size: 40px;
+      position: absolute;
+      top: -15px;
+      left: -8px;
+      z-index: -1;
+      font-family: sans-serif;
+    }
+
+    .cardMetrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 12px;
+      margin-bottom: var(--v2-spacing-xl);
+      padding-bottom: var(--v2-spacing-md);
+      border-bottom: 1px dashed var(--v2-color-border);
+    }
+
+    .metricItem {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metricLabel {
+      font-size: 9px;
+      color: var(--v2-color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metricValue {
+      font-size: var(--v2-font-size-sm);
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cardTradeoff {
+      background: var(--v2-color-bg-warm);
+      border-radius: var(--v2-radius-lg);
+      padding: 12px 14px;
+      margin-bottom: var(--v2-spacing-lg);
+      position: relative;
+      border-left: 3px solid var(--v2-color-primary);
+    }
+
+    .tradeoffSplit {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .tradeoffColumn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tradeoffTitle {
+      font-size: 10px;
+      color: var(--v2-color-primary-dark);
+      margin-bottom: 2px;
+      font-weight: var(--v2-font-weight-bold);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tradeoffText {
+      font-size: 11px;
+      color: var(--v2-color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .tradeoffItem {
+      font-size: 10px;
+      color: var(--v2-color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .cardCTA {
+      margin-top: auto;
+      width: 100%;
+      height: 44px;
+      border-radius: var(--v2-radius-round);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--v2-font-size-sm);
+      font-weight: var(--v2-font-weight-semibold);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+
+    .cta--primary {
+      background: var(--v2-color-primary);
+      color: var(--v2-color-text-white);
+      box-shadow: 0 4px 16px rgba(166,124,82,0.3);
+    }
+
+    .cta--secondary {
+      background: var(--v2-color-text-white);
+      color: var(--v2-color-text-title);
+      border: 1px solid var(--v2-color-border);
+    }
+
+    .budgetCard.is-highlight {
+      border: 2px solid var(--v2-color-primary);
+      box-shadow: 0 12px 32px rgba(166,124,82,0.25);
+      transform: scale(1.03);
+    }
+    
+    .budgetCard.is-highlight .cardHero::after {
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(166,124,82,0.4) 60%, rgba(41,23,17,0.9) 100%);
+    }
+
+    /* 暗黑主题 */
+    .budgetCard.theme-dark {
+      background: var(--v2-dark-card);
+      border: 1px solid var(--v2-dark-border);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .theme-dark .cardHero::after {
+      background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 60%, var(--v2-dark-card) 100%);
+    }
+    .theme-dark .cardBadge {
+      background: rgba(0,0,0,0.6);
+      color: var(--v2-dark-gold);
+      border: 1px solid var(--v2-dark-gold);
+    }
+    .theme-dark .cardTier { color: var(--v2-dark-gold); }
+    .theme-dark .cardVibe { color: var(--v2-dark-text-title); }
+    .theme-dark .cardVibe::before { color: rgba(212, 175, 55, 0.1); }
+    .theme-dark .cardMetrics { border-bottom-color: rgba(255,255,255,0.1); }
+    .theme-dark .metricLabel { color: var(--v2-dark-text-secondary); }
+    .theme-dark .metricValue { color: var(--v2-dark-text-title); }
+    .theme-dark .cardTradeoff { 
+      background: rgba(212, 175, 55, 0.05); 
+      border-left-color: var(--v2-dark-gold); 
+    }
+    .theme-dark .tradeoffTitle { color: var(--v2-dark-gold); }
+    .theme-dark .tradeoffText, .theme-dark .tradeoffItem { color: var(--v2-dark-text-secondary); }
+    .theme-dark .cta--secondary {
+      background: transparent;
+      color: var(--v2-dark-gold);
+      border: 1px solid var(--v2-dark-border);
+    }
+    .theme-dark .cta--primary {
+      background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%);
+      color: #1A1A1A;
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+    }
+
+    .cardCTA.cta--disabled {
+      background: var(--v2-color-border) !important;
+      color: var(--v2-color-text-tertiary) !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      pointer-events: none !important;
+    }
+    .theme-dark .cardCTA.cta--disabled {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .composer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--v2-spacing-sm);
+      padding: var(--v2-spacing-md) var(--v2-spacing-lg) 26px;
+      background: var(--v2-color-text-white);
+      box-shadow: 0px -4px 32px rgba(41, 23, 17, 0.08);
+      z-index: 10;
+    }
+    .composerBox {
+      display: flex; align-items: flex-end; gap: var(--v2-spacing-sm); background: transparent;
+    }
+    .inputWrap {
+      flex: 1; min-height: 36px; padding: 8px var(--v2-spacing-md); border-radius: var(--v2-radius-lg); background: var(--v2-color-bg-step); display: flex; align-items: center;
+    }
+    .textarea {
+      width: 100%; border: none; background: transparent; outline: none; font-size: var(--v2-font-size-base); color: var(--v2-color-text-primary); resize: none; height: 20px;
+    }
+    .sendButton {
+      display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 36px; border-radius: var(--v2-radius-lg); background: var(--v2-color-primary); color: var(--v2-color-text-white); font-size: var(--v2-font-size-base); cursor: pointer;
+    }
+
+    #profileBookmarkContainer {
+      position: absolute;
+      top: 0;
+      left: 20px;
+      right: 20px;
+      transform: translateY(-100%); 
+      z-index: -1; 
+    }
+    #profileBookmarkContainer:empty {
+      display: none;
+    }
+    .profile-bookmark-wrapper {
+      background: var(--v2-color-text-white);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 -8px 24px rgba(166,124,82,0.12);
+      border: 1px solid var(--v2-color-border);
+      border-bottom: none;
+      overflow: hidden;
+      position: relative;
+    }
+    .bookmark-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px 8px 12px;
+      border-bottom: 1px solid rgba(166,124,82,0.08);
+      background: #FAFAFA;
+    }
+    .bm-tabs-wrapper {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+    }
+    .bm-tabs-wrapper::-webkit-scrollbar { display: none; }
+    
+    .bm-plan-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-tertiary);
+      cursor: pointer;
+      white-space: nowrap;
+      background: transparent;
+      border-radius: 16px; 
+      transition: all 0.2s ease;
+    }
+    .bm-plan-tab.active {
+      color: var(--v2-color-primary-dark);
+      background: rgba(166,124,82,0.12);
+    }
+    
+    .bm-plan-tab .delete-btn {
+      display: none; 
+      margin-left: 4px;
+      font-size: 14px;
+      color: var(--v2-color-text-tertiary);
+      line-height: 1;
+      width: 14px;
+      height: 14px;
+      text-align: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+    .bm-plan-tab.active .delete-btn {
+      display: inline-block;
+      color: var(--v2-color-primary);
+    }
+    .bm-plan-tab.active .delete-btn:hover {
+      background: rgba(166,124,82,0.2);
+      color: var(--v2-color-primary-dark);
+    }
+
+    .bm-toggle-btn {
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: transparent; 
+      color: var(--v2-color-primary-dark); 
+    }
+    .tab-arrow {
+      font-size: 10px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .bookmark-content {
+      padding: 12px 16px 16px;
+      opacity: 1;
+      transition: max-height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1), padding 0.4s ease, opacity 0.3s ease;
+      background: var(--v2-color-text-white);
+    }
+    .profile-bookmark-wrapper.collapsed .bookmark-content {
+      max-height: 0 !important;
+      padding-top: 0;
+      padding-bottom: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .bookmark-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+    }
+    .bm-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bm-label {
+      font-size: 10px;
+      color: var(--v2-color-text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+    .bm-val {
+      font-size: 13px;
+      color: var(--v2-color-text-title);
+      font-weight: var(--v2-font-weight-bold);
+    }
+
+    .edit-icon-svg {
+      width: 12px;
+      height: 12px;
+      color: var(--v2-color-primary);
+      opacity: 0.5;
+      margin-left: 4px;
+      vertical-align: text-top;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .edit-icon-svg:hover {
+      opacity: 1;
+      transform: scale(1.1);
+      color: var(--v2-color-primary-dark);
+    }
+    .edit-area {
+      border-bottom: 1px dashed var(--v2-color-primary-dark);
+      padding: 0 2px;
+      min-width: 20px;
+      display: inline-block;
+      outline: none;
+      transition: all 0.2s ease;
+      border-radius: 2px;
+    }
+    .edit-area:focus {
+      background: rgba(166,124,82,0.1);
+      border-bottom-style: solid;
+      color: var(--v2-color-primary-dark);
+    }
+
+    .edit-date-input {
+      border: none;
+      border-bottom: 1px dashed var(--v2-color-primary-dark);
+      background: transparent;
+      color: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      font-family: inherit;
+      padding: 0 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    .edit-date-input:focus {
+      background: rgba(166,124,82,0.1);
+      border-bottom-style: solid;
+      color: var(--v2-color-primary-dark);
+    }
+
+    .bm-budget-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--v2-color-border);
+    }
+    .bm-budget-top .bm-val-large {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--v2-color-primary-dark);
+    }
+    .bm-hints {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--v2-color-border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 8px;
+      font-size: 11px;
+      font-weight: var(--v2-font-weight-bold);
+    }
+    .bm-hint-pro { color: var(--v2-color-success); }
+    .bm-hint-con { color: #D9534F; }
+
+    .bm-quotes-header {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--v2-color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bm-quotes-title {
+      font-size: 11px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-secondary);
+    }
+    
+    .inline-quotes-list {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .inline-quote-card {
+      background: var(--v2-color-bg-warm);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(166,124,82,0.1);
+      transition: background 0.2s;
+    }
+    .inline-quote-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+      flex: 1;
+      min-width: 0;
+    }
+    .inline-quote-left:hover .inline-quote-title {
+      color: var(--v2-color-primary);
+    }
+    .inline-quote-left:hover .inline-quote-price {
+      text-decoration: underline;
+    }
+    .inline-quote-title {
+      font-size: 10px;
+      color: var(--v2-color-text-tertiary);
+    }
+    .inline-quote-subtitle {
+      font-size: 8px;
+      color: var(--v2-color-text-tertiary);
+      margin-left: 4px;
+      opacity: 0.8;
+    }
+    .inline-quote-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--v2-color-primary);
+    }
+    .inline-quote-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .inline-quote-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--v2-color-text-tertiary);
+      opacity: 0.6;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .inline-quote-delete:hover {
+      opacity: 1;
+      color: #D9534F;
+    }
+    .inline-quote-lock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--v2-color-text-tertiary);
+      opacity: 0.6;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .inline-quote-lock:hover {
+      opacity: 1;
+      color: var(--v2-color-primary-dark);
+    }
+    .inline-quote-lock.is-locked {
+      opacity: 1;
+      color: var(--v2-color-primary-dark);
+    }
+
+    .introCard {
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 24px rgba(166,124,82,0.12);
+      border: 1px solid rgba(166, 124, 82, 0.12);
+      margin-bottom: 16px;
+    }
+    .introEyebrow {
+      color: rgba(166, 124, 82, 0.82);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+    }
+    .introStats {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .introStatItem {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .introStatItem::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 0;
+      width: 1px;
+      height: calc(100% - 8px);
+      background: rgba(166, 124, 82, 0.12);
+    }
+    .introStatItem:last-child::after {
+      display: none;
+    }
+    .introStatValue {
+      color: #291711;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .introStatLabel {
+      margin-top: 4px;
+      color: #999;
+      font-size: 10px;
+      line-height: 1.2;
+    }
+    
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modalContent {
+      background: var(--v2-color-text-white);
+      border-radius: var(--v2-radius-xl);
+      padding: 24px;
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .overlay.active .modalContent {
+      transform: scale(1);
+    }
+    .modalTitle {
+      font-size: var(--v2-font-size-lg);
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+      margin-bottom: 20px;
+    }
+    .qrImage {
+      width: 160px;
+      height: 160px;
+      margin-bottom: 16px;
+      border-radius: var(--v2-radius-md);
+      border: 1px solid var(--v2-color-border);
+      background: #F0F0F0;
+    }
+    .modalDesc {
+      font-size: var(--v2-font-size-sm);
+      color: var(--v2-color-text-secondary);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .qrCountryTabs {
+      display: flex;
+      width: 100%;
+      border-radius: var(--v2-radius-md);
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid var(--v2-color-border);
+    }
+    .qrCountryTab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      font-size: var(--v2-font-size-base);
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-secondary);
+      cursor: pointer;
+      background: var(--v2-color-bg-card);
+      transition: all 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .qrCountryTab.is-active {
+      background: var(--v2-color-primary);
+      color: #FFFFFF;
+    }
+    .qrCountryTab:not(.is-active):active {
+      background: #f0ebe4;
+    }
+
+    .qrToast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: rgba(0, 0, 0, 0.82);
+      color: #fff;
+      font-size: 13px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      text-align: center;
+      line-height: 1.6;
+      min-width: 220px;
+      z-index: 4000;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .qrToast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #formOverlay {
+      align-items: flex-end;
+    }
+    .drawerContent {
+      background: var(--v2-color-text-white);
+      width: 100%;
+      border-radius: 24px 24px 0 0;
+      padding: 16px 24px 34px;
+      box-shadow: 0 -12px 32px rgba(0,0,0,0.12);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      max-height: 85%;
+      box-sizing: border-box;
+    }
+    #formOverlay.active .drawerContent {
+      transform: translateY(0);
+    }
+    .drawerIndicator {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: #E0E0E0;
+      margin: 0 auto 20px auto;
+    }
+    .drawerHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .drawerTitle {
+      font-size: var(--v2-font-size-lg);
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+    }
+    .closeBtn {
+      font-size: 26px;
+      color: var(--v2-color-text-tertiary);
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .closeBtn:hover {
+      color: var(--v2-color-text-title);
+    }
+    
+    .formScrollArea {
+      overflow-y: auto;
+      padding-right: 4px;
+      padding-bottom: 10px;
+    }
+    .formScrollArea::-webkit-scrollbar { width: 4px; }
+    .formScrollArea::-webkit-scrollbar-thumb { background: var(--v2-color-border); border-radius: 4px; }
+    
+    .formList {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .formItem {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
+    .formItem label {
+      width: 56px; 
+      flex-shrink: 0;
+      text-align: justify;
+      text-align-last: justify; 
+      font-size: 13px;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-text-title);
+    }
+    .formItem input {
+      flex: 1; 
+      min-width: 0;
+      height: 40px; 
+      border-radius: 8px; 
+      background: var(--v2-color-text-white);
+      border: 1px solid var(--v2-color-border);
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+      color: var(--v2-color-text-primary);
+      box-sizing: border-box;
+    }
+    .formItem input:focus {
+      border-color: var(--v2-color-primary);
+      box-shadow: 0 0 0 3px rgba(166,124,82,0.12);
+    }
+    .formItem input[readonly] {
+      background: var(--v2-color-bg-step);
+      border-color: transparent;
+      color: var(--v2-color-text-secondary);
+      font-weight: var(--v2-font-weight-medium);
+    }
+    .budgetInputGroup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+    .budgetInputGroup input {
+      flex: 1;
+      width: 0; 
+      text-align: center;
+      font-weight: var(--v2-font-weight-bold);
+      color: var(--v2-color-primary-dark);
+      padding: 0 4px;
+    }
+    .budgetSeparator {
+      color: var(--v2-color-text-secondary);
+      font-weight: var(--v2-font-weight-bold);
+    }
+    
+    .drawerSubmitBtn {
+      height: 44px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--v2-color-primary) 0%, var(--v2-color-primary-dark) 100%);
+      box-shadow: 0 6px 16px rgba(166,124,82,0.25);
+      margin-top: 16px;
+      font-size: 15px;
+      font-weight: var(--v2-font-weight-bold);
+      letter-spacing: 0.5px;
+      color: var(--v2-color-text-white);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .drawerSubmitBtn:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 10px rgba(166,124,82,0.15);
+    }
+
+    .chat-msg-row {
+      display: flex;
+      gap: 10px;
+      margin: 16px 0;
+      padding: 0 var(--v2-spacing-lg);
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--v2-color-primary), var(--v2-color-primary-dark)); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0; box-shadow: 0 4px 8px rgba(166,124,82,0.2);
+    }
+    .chat-bubble {
+      background: var(--v2-color-text-white);
+      padding: 12px 16px;
+      border-radius: 4px 16px 16px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      font-size: 14px;
+      color: var(--v2-color-text-title);
+      line-height: 1.5;
+      max-width: 75%;
+    }
+    .chat-btn {
+      display: block;
+      margin-top: 12px;
+      padding: 10px 0;
+      text-align: center;
+      background: var(--v2-color-bg-warm);
+      color: var(--v2-color-primary-dark);
+      border: 1px solid rgba(166,124,82,0.2);
+      border-radius: var(--v2-radius-lg);
+      font-weight: var(--v2-font-weight-bold);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chat-btn:active { transform: scale(0.98); background: var(--v2-color-primary-light); }
+
+    /* ======== 报价单客服弹窗（需高于报价页 z-index:2000） ======== */
+    #serviceQrOverlay {
+      position: fixed;
+      z-index: 3000;
+    }
+
+    /* ========================================= */
+    /* ======== 新增：结合后的报价单蒙层 ======== */
+    /* ========================================= */
+    #quotePageOverlay {
+      background: #FAFAFA;
+      flex-direction: column;
+      align-items: stretch;
+      z-index: 2000;
+    }
+    .quotePageNav {
+      height: 88px;
+      padding-top: 44px;
+      background: #FFFFFF;
+      position: relative;
+      border-bottom: 1px solid var(--v2-color-border);
+      flex-shrink: 0;
+      z-index: 50;
+      box-sizing: border-box;
+    }
+    .quotePageNav .backBtn {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 15px;
+      color: #1A1A1A;
+      cursor: pointer;
+      font-weight: 500;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quotePageNav .backBtn:active {
+      opacity: 0.6;
+    }
+    .quotePageNav .backBtn svg {
+      width: 22px;
+      height: 22px;
+    }
+    .quotePageNav .title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1A1A1A;
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    .quoteScrollContainer {
+      flex: 1;
+      overflow-y: auto;
+      width: 100%;
+      background-color: #f7f5f2;
+      position: relative;
+    }
+    .quoteScrollContainer::-webkit-scrollbar { display: none; }
+
+    /* ========================================= */
+    /* ======== 报价界面的原生 CSS ======== */
+    /* ========================================= */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .agency-card { transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .diff-highlight { transition: color 0.3s ease; }
+    /* ======== Provider Sticky ======== */
+    .provider-section {
+      position: relative;
+      z-index: 80;
+      background: #f7f5f2;
+      padding-top: 24px;
+      transition: box-shadow 0.3s ease;
+    }
+    .provider-section.is-stuck {
+      position: fixed;
+      top: 88px;
+      left: 0;
+      right: 0;
+      max-width: 448px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .provider-spacer { display: none; }
+    .provider-spacer.is-active { display: block; }
+    .compare-banner-inline {
+      max-width: 0;
+      overflow: hidden;
+      padding: 0;
+      border-width: 0;
+      opacity: 0;
+      transition: all 0.4s ease;
+      flex-shrink: 0;
+    }
+    .compare-banner-inline.is-visible {
+      max-width: 200px;
+      opacity: 1;
+      padding: 6px 12px;
+      border-width: 1px;
+      pointer-events: auto;
+    }
+
+
+    /* ========================================= */
+    /* ======== SOP 交互模块 (Tab + Stepper) ======== */
+    /* ========================================= */
+    .sopInteractiveCard {
+      padding: 16px 4px;
+    }
+    .stageTabs {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+    .stageTabs::before {
+      content: '';
+      position: absolute; top: 18px; left: 12.5%; right: 12.5%;
+      height: 2px; background: #EBEDF0; z-index: 1;
+    }
+    .stageTabItem {
+      display: flex; flex-direction: column; align-items: center;
+      position: relative; z-index: 2; flex: 1; cursor: pointer;
+    }
+    .stageDotWrapper {
+      background: #f4efe6; padding: 0 4px; margin-bottom: 8px;
+    }
+    .stageDot {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #EBEDF0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #fff; font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    .stageName {
+      font-size: 12px; color: #969799;
+      transition: all 0.3s ease; white-space: nowrap;
+    }
+    .stageTabItem.is-active .stageDot {
+      background: #12B886;
+      transform: scale(1.15);
+      box-shadow: 0 0 0 3px rgba(18, 184, 134, 0.15);
+    }
+    .stageTabItem.is-active .stageName {
+      color: #323233; font-size: 13px; font-weight: bold;
+    }
+    .subNodeStepper {
+      position: relative; padding: 0 8px; min-height: 180px;
+    }
+    .subNodeItem {
+      display: flex; position: relative; padding-bottom: 24px;
+    }
+    .subNodeItem:last-child { padding-bottom: 8px; }
+    .subNodeItem::before {
+      content: ''; position: absolute; left: 7px; top: 20px; bottom: -4px;
+      width: 1.5px; background: #EBEDF0;
+    }
+    .subNodeItem:last-child::before { display: none; }
+    .stepperDot {
+      width: 16px; height: 16px; margin-right: 16px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; position: relative; z-index: 2; background: #f4efe6;
+    }
+    .stepperDotInner {
+      width: 8px; height: 8px; border-radius: 50%; background: #12B886;
+    }
+    .stepperContent { flex: 1; transform: translateY(-2px); }
+    .stepperTitle { font-size: 14px; font-weight: bold; color: #323233; margin-bottom: 4px; }
+    .stepperDesc { font-size: 12px; color: #969799; line-height: 1.5; }
+    @keyframes sopFadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .sop-animate-fade {
+      animation: sopFadeSlideUp 0.3s ease forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="device">
+    <div class="notch"></div>
+    
+    <div class="chatPage" id="chatPage">
+      <div class="navBar">
+        <div class="titleWrap">
+          <div class="title">NeekBOT</div>
+          <div class="subtitle">基于10000+真实行程训练生成</div>
+        </div>
+      </div>
+      
+      <div class="messageScroll" id="scrollArea">
+        <div class="msg-wrapper">
+          <div class="introCard">
+            <div class="introEyebrow">NEEKBOT</div>
+            <div class="introStats">
+              <div class="introStatItem">
+                <div class="introStatValue">10000+</div>
+                <div class="introStatLabel">真实行程</div>
+              </div>
+              <div class="introStatItem">
+                <div class="introStatValue">1000+</div>
+                <div class="introStatLabel">服务客户</div>
+              </div>
+              <div class="introStatItem">
+                <div class="introStatValue">10年</div>
+                <div class="introStatLabel">地接经验</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="richModuleItem">
+          <div class="moduleHeader">
+            <div class="moduleTitle">Quick Match</div>
+            <div class="moduleDesc">左右滑动看看不同预算下的非洲体验会是什么样的？</div>
+          </div>
+          
+          <div class="budgetCarousel" id="budgetCarousel">
+            
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./1500.jpg');">
+                <div class="heroContent">
+                  <div class="cardTier">特种兵王</div>
+                  <div class="cardPrice">$400-$1,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">极限穷游 · 硬核吃苦</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">3-5天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">6-8人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">老旧租赁-改装面包车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">经济营地(限电网)</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">年轻体力好的背包客</div>
+                      <div class="tradeoffItem">能吃苦、不挑剔吃住</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">落地拼团随机组队</div>
+                      <div class="tradeoffItem">车子老旧陷车风险高</div>
+                      <div class="tradeoffItem">景点间更换车和向导</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openQR('$400-$1,500')">立即参团</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./1500-2200.jpg');">
+                <div class="cardBadge">🥉12-15%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">入门打卡</div>
+                  <div class="cardPrice">$1,500-2,200</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">车内拥挤 · 行程紧凑</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">3-7天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">6-7人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">老旧租赁-陆地巡航舰</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">经济帐篷/市区酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">看重“去过”而非体验</div>
+                      <div class="tradeoffItem">首次非洲行，预算有限</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">人多车内空间拥挤</div>
+                      <div class="tradeoffItem">行程较紧赶路较多</div>
+                      <div class="tradeoffItem">住宿和用餐较基础</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$1,500', '$2,200', '入门方案（打卡型）')">定制入门方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard is-highlight" id="highlightCard">
+              <div class="cardHero" style="background-image: url('./2200-2800.png');">
+                <div class="cardBadge cardBadge--primary">⬆🥇 45-50%选择！</div>
+                <div class="heroContent">
+                  <div class="cardTier">经典之选</div>
+                  <div class="cardPrice">$2,200-2,800</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">舒适均衡 · 最高性价比</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">5-8天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">4-6人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">地接自有-全险陆巡</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">园区内舒适住宿</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想要完整体验Safari</div>
+                      <div class="tradeoffItem">希望价格和体验均衡</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">能自己组搭子</div>
+                      <div class="tradeoffItem">总赶路距离较长</div>
+                      <div class="tradeoffItem">行程节奏偏“旅游型”</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--primary" onclick="openForm('$2,200', '$2,800', '经典方案（均衡型）')">定制经典方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./2800-3500.png');">
+                <div class="cardBadge">🥈20-25%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">深度体验</div>
+                  <div class="cardPrice">$2,800-3,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">从容轻松 · 沉浸自然</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-9天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">2-4人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">地接全险-崭新陆巡</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">园区内景观酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想看到更多动物</div>
+                      <div class="tradeoffItem">不想赶路希望节奏轻松</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">仍以陆地交通为主</div>
+                      <div class="tradeoffItem">部分路段车程较长</div>
+                      <div class="tradeoffItem">价格明显高于基础款</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$2,800', '$3,500', '深度方案（沉浸型）')">定制深度方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard">
+              <div class="cardHero" style="background-image: url('./3500-4500.png');">
+                <div class="cardBadge">💎10-12%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">小资轻奢</div>
+                  <div class="cardPrice">$3,500-4,500</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">私密体验 · 远离人群</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-9天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-4人/车</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">全险陆巡+内陆飞机</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">私人保护区标准间</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想要舒适度明显提升</div>
+                      <div class="tradeoffItem">更看重体验而不是数量</div>
+                      <div class="tradeoffItem">情侣/度假型出行</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">价格进入中高端区间</div>
+                      <div class="tradeoffItem">行程更"精"而不是"多"</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openForm('$3,500', '$4,500', '轻奢方案（私密型）')">定制轻奢方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard theme-dark">
+              <div class="cardHero" style="background-image: url('./4500-7000.png');">
+                <div class="cardBadge">👑10-12%选择</div>
+                <div class="heroContent">
+                  <div class="cardTier">奢华进阶</div>
+                  <div class="cardPrice">$4,500-7,000</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">高端度假 · 独享资源</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">6-15天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-4人</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">内陆飞机+敞篷游猎车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">私人野奢酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">想要独特且高质量体验</div>
+                      <div class="tradeoffItem">不希望浪费时间在路上</div>
+                      <div class="tradeoffItem">对住宿和体验有较高要求</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">预算较高</div>
+                      <div class="tradeoffItem">需要提前规划</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--primary" onclick="openForm('$4,500', '$7,000', '奢华方案（独享型）')">定制奢华方案</div>
+              </div>
+            </div>
+
+            <div class="budgetCard theme-dark">
+              <div class="cardHero" style="background-image: url('./7000 +.png');">
+                <div class="cardBadge">⚜️ 稀有</div>
+                <div class="heroContent">
+                  <div class="cardTier">顶级定制</div>
+                  <div class="cardPrice">$7,500+</div>
+                </div>
+              </div>
+              <div class="cardBody">
+                <div class="cardVibe">专属管家 · 动物零距离</div>
+                <div class="cardMetrics">
+                  <div class="metricItem"><span class="metricLabel">天数</span><div class="metricValue">5-20天</div></div>
+                  <div class="metricItem"><span class="metricLabel">人数</span><div class="metricValue">1-4人</div></div>
+                  <div class="metricItem"><span class="metricLabel">交通</span><div class="metricValue">直升机+私人游猎车</div></div>
+                  <div class="metricItem"><span class="metricLabel">住宿</span><div class="metricValue">管家式酒店</div></div>
+                </div>
+                <div class="cardTradeoff">
+                  <div class="tradeoffSplit">
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">适合谁：</div>
+                      <div class="tradeoffItem">追求极致的Safari体验</div>
+                      <div class="tradeoffItem">完全的私密性</div>
+                    </div>
+                    <div class="tradeoffColumn">
+                      <div class="tradeoffTitle">需接受：</div>
+                      <div class="tradeoffItem">预算极高</div>
+                      <div class="tradeoffItem">酒店非常稀缺</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="cardCTA cta--secondary" onclick="openAdvisorQR()">联系专属顾问</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="chatHistory"></div>
+
+      </div>
+    </div>
+
+    <!-- 底部输入区 -->
+    <div class="composer">
+      <div id="profileBookmarkContainer"></div>
+      <div class="composerBox">
+        <div class="inputWrap">
+          <input type="text" class="textarea" id="chatInput" placeholder="告诉 NeekBot 你的想法..." autocomplete="off"/>
+        </div>
+        <div class="sendButton" id="sendBtn">发送</div>
+      </div>
+    </div>
+
+    <!-- 二维码居中弹窗 -->
+    <div id="qrOverlay" class="overlay" onclick="closeQR(event)">
+      <div class="modalContent" style="position:relative;">
+        <div class="qrCountryTabs">
+          <div class="qrCountryTab is-active" data-country="kenya" onclick="switchQRTab('kenya')">肯尼亚</div>
+          <div class="qrCountryTab" data-country="tanzania" onclick="switchQRTab('tanzania')">坦桑尼亚</div>
+        </div>
+        <img id="qrModalImage" src="./qr-kenya.png" alt="QR Code" class="qrImage">
+        <div class="modalDesc" id="qrModalDesc">当前信息已复制<br>长按扫码添加客服黏贴对接</div>
+      </div>
+    </div>
+
+    <div class="qrToast" id="qrToast"></div>
+
+    <!-- 客服二维码弹窗 -->
+    <div id="advisorQrOverlay" class="overlay" onclick="closeAdvisorQR(event)">
+      <div class="modalContent">
+        <div class="modalTitle">联系专属顾问</div>
+        <img src="./qr-advisor.png" alt="Advisor QR Code" class="qrImage">
+        <div class="modalDesc">当前信息已复制<br>长按添加顾问黏贴</div>
+      </div>
+    </div>
+
+    <!-- 报价单客服二维码弹窗 -->
+    <div id="serviceQrOverlay" class="overlay" onclick="closeServiceQR(event)">
+      <div class="modalContent">
+        <div class="modalTitle">联系客服</div>
+        <img src="./qr-advisor.png" alt="Service QR Code" class="qrImage">
+        <div class="modalDesc">当前定制信息已复制<br>长按扫码添加客服黏贴定制信息</div>
+      </div>
+    </div>
+
+    <!-- 定制需求底部抽屉 -->
+    <div id="formOverlay" class="overlay" onclick="closeDrawer(event)">
+      <div class="drawerContent">
+        <div class="drawerIndicator"></div>
+        <div class="drawerHeader">
+          <span class="drawerTitle">填写定制需求</span>
+          <span class="closeBtn" onclick="closeDrawer()">&times;</span>
+        </div>
+        
+        <div class="formScrollArea">
+          <div class="formList">
+            <div class="formItem">
+              <label>昵称</label>
+              <input type="text" id="f_nickname" placeholder="非必填，默认为 chatid">
+            </div>
+            <div class="formItem">
+              <label>目的地</label>
+              <input type="text" id="f_destination" value="肯尼亚" readonly>
+            </div>
+            <div class="formItem">
+              <label>出发日期</label>
+              <input type="date" id="f_date">
+            </div>
+            <div class="formItem">
+              <label>人数</label>
+              <input type="number" id="f_people" placeholder="请输入出行人数">
+            </div>
+            <div class="formItem">
+              <label>天数</label>
+              <input type="number" id="f_days" placeholder="请输入游玩天数">
+            </div>
+            <div class="formItem">
+              <label>预算区间</label>
+              <div class="budgetInputGroup">
+                <input type="text" id="f_budget_min" placeholder="最低">
+                <span class="budgetSeparator">-</span>
+                <input type="text" id="f_budget_max" placeholder="最高">
+              </div>
+            </div>
+            
+            <button class="drawerSubmitBtn" onclick="submitForm()">提交需求</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🌟 融合后的真实报价单页面 🌟 -->
+    <div id="quotePageOverlay" class="overlay">
+      <div class="quotePageNav">
+        <div class="backBtn" onclick="closeQuotePage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>返回</span>
+        </div>
+        <div class="title">专属报价单</div>
+      </div>
+      
+      <!-- 以下为 Safari 报价单完整 HTML，将其原 body 内容放入带滚动的容器内 -->
+      <div class="quoteScrollContainer text-stone-800 font-sans antialiased selection:bg-emerald-900 selection:text-white pb-10">
+        
+
+
+        <div class="max-w-md mx-auto min-h-[800px] relative overflow-x-hidden shadow-2xl sm:rounded-3xl border-0 sm:my-8 bg-[#f7f5f2]">
+          
+          <!-- --- 沉浸式高级黑卡头部 --- -->
+          <div class="bg-stone-900 text-stone-50 pt-6 pb-8 px-5 rounded-b-[2rem] shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 100% 0%, #ffffff 0%, transparent 50%)"></div>
+            
+            <header class="flex justify-between items-center relative z-10 mb-6">
+              <button id="lang-toggle" class="flex items-center gap-1.5 bg-stone-800/50 hover:bg-stone-700/50 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium transition-all text-stone-300 border border-stone-700/50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                <span id="lang-text">中 / EN</span>
+              </button>
+              <div class="text-right">
+                <span class="text-[10px] text-stone-400 uppercase tracking-widest block mb-0.5">Quote Ref</span>
+                <span class="text-xs text-stone-300 font-mono tracking-wider">Q-20260429-X8A</span>
+              </div>
+            </header>
+
+            <div class="relative z-10">
+              <h2 class="text-2xl font-light tracking-wide">尊敬的 <span id="quote-guest-name" class="font-semibold">旅行者</span></h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-y-3 gap-x-4 mt-5 pt-5 border-t border-stone-800/60 relative z-10">
+              <div>
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Destination</p>
+                <p id="quote-destination" class="text-sm font-medium text-stone-200">肯尼亚</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Departure</p>
+                <p id="quote-departure" class="text-sm font-medium text-stone-200">未定</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Duration</p>
+                <p id="quote-duration" class="text-sm font-medium text-stone-200">-天</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Guests</p>
+                <p id="quote-guests" class="text-sm font-medium text-stone-200">-人</p>
+              </div>
+              <div class="col-span-2">
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Budget</p>
+                <p id="quote-budget" class="text-sm font-medium text-stone-200">-</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- --- 地接社选择模块 --- -->
+          <div id="providerSpacer" class="provider-spacer"></div>
+          <div id="providerSection" class="provider-section relative z-20 mb-6">
+            <div class="mb-3 px-5 flex items-center justify-between">
+               <h3 class="text-sm font-bold text-stone-800 uppercase tracking-widest flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-stone-800"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                  Select Provider
+               </h3>
+            </div>
+            <div id="agency-carousel" class="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pl-5 pr-5 pb-5 pt-1 items-center"></div>
+            <div class="flex items-center justify-between px-6 pb-4 gap-3">
+               <div id="carousel-dots" class="flex items-center gap-2"></div>
+               <div id="compare-banner" class="compare-banner-inline bg-stone-900/95 backdrop-blur-md shadow-lg rounded-full px-3 py-1.5 flex items-center gap-1.5 opacity-0 pointer-events-none transition-all duration-500 ease-out border border-stone-700/50">
+                  <svg class="w-3.5 h-3.5 text-[#d4af37]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span class="text-[10px] font-medium text-stone-200 tracking-wide whitespace-nowrap">
+                     与 <span id="compare-agency-name" class="font-bold text-white"></span> 对比
+                  </span>
+               </div>
+               <button id="view-all-agencies-btn" class="flex items-center gap-1 text-[10px] font-bold text-stone-500 uppercase tracking-widest hover:text-stone-800 transition-colors">
+                  全部 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+               </button>
+            </div>
+          </div>
+
+          <!-- 区域 1：价格与明细 -->
+          <div class="mx-4 mt-6 mb-8 bg-white rounded-[2rem] pt-8 px-5 pb-4 shadow-sm border border-stone-200/50 relative z-10">
+            <div class="mb-8">
+              <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center justify-center gap-2 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                Financial Summary
+              </h3>
+              <div class="text-center mb-6">
+                <p class="text-[10px] text-stone-500 uppercase tracking-widest mb-1">人均总费用</p>
+                <div class="relative inline-flex items-baseline justify-center gap-1">
+                  <span id="diff-total" class="absolute -top-3 -right-12 text-sm font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                  <span class="text-2xl font-medium text-stone-400">$</span>
+                  <span id="val-total" class="text-5xl font-semibold text-stone-900 tracking-tight">2,614</span>
+                  <span class="text-xl font-medium text-stone-400">.20</span>
+                </div>
+              </div>
+              <div class="bg-stone-50 rounded-2xl p-5 space-y-3 border border-stone-100/80">
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-stone-500">交通费用</span>
+                  <div class="relative flex items-center">
+                    <span id="diff-transport" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                    <span class="font-medium text-stone-800">$<span id="val-transport">875</span></span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-stone-500">住宿费用</span>
+                  <div class="relative flex items-center">
+                    <span id="diff-accommodation" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                    <span class="font-medium text-stone-800">$<span id="val-accommodation">959</span></span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                  <span class="text-stone-500">门票及活动</span>
+                  <div class="relative flex items-center">
+                    <span id="diff-activities" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                    <span class="font-medium text-stone-800">$<span id="val-activities">530</span></span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center text-sm pt-3 border-t border-stone-200/60">
+                  <span class="text-stone-500">服务费</span>
+                  <div class="relative flex items-center">
+                    <span id="diff-service" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                    <span class="font-medium text-stone-800">$<span id="val-service">300</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-0">
+              <section class="py-5 border-t border-stone-100">
+                <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+                  <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg> 
+                    Transport Details
+                  </h3>
+                  <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </div>
+                <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+                  <div class="overflow-hidden">
+                    <div class="pt-5 px-1">
+                      <div class="flex justify-between items-start mb-4">
+                        <div>
+                          <p class="text-[10px] text-stone-400 uppercase tracking-wider mb-1">Vehicle Type</p>
+                          <p class="text-sm font-semibold text-stone-800">陆地巡航舰 4X4 Landcruiser</p>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-[10px] text-stone-400 uppercase tracking-wider mb-1">Total/Pax</p>
+                          <div class="relative inline-flex items-center justify-end">
+                            <span id="diff-detail-transport" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                            <p class="text-sm font-semibold text-emerald-800">$<span id="val-detail-transport">875</span></p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex gap-6 text-xs">
+                        <div><span class="text-stone-400 block mb-0.5">服务天数</span><span class="font-medium text-stone-800">7 天</span></div>
+                        <div><span class="text-stone-400 block mb-0.5">每人每天</span><div class="relative inline-flex items-center"><span id="diff-detail-transportDaily" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span><span class="font-medium text-stone-800">$<span id="val-detail-transportDaily">125</span></span></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- --- 住宿明细 --- -->
+              <section class="py-5 border-t border-stone-100">
+                <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+                  <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/></svg>
+                    Accommodation Details
+                  </h3>
+                  <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </div>
+                <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+                  <div class="overflow-hidden">
+                    <div class="pt-5 px-1">
+                      <ul class="divide-y divide-stone-100">
+                        <!-- Night 1 -->
+                        <li class="py-4 flex gap-4 first:pt-0">
+                          <div class="w-10 shrink-0 text-center pt-0.5">
+                            <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">01</div>
+                          </div>
+                          <div class="grow flex justify-between items-start">
+                            <div>
+                              <h4 class="text-sm font-semibold text-stone-800">Tulia Amboseli Camp</h4>
+                              <p class="text-[10px] text-stone-400 mt-0.5">第一晚住宿</p>
+                            </div>
+                            <div class="text-right">
+                              <div class="relative inline-flex items-center">
+                                <span id="diff-detail-h1n1" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                                <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h1n1">132</span></span>
+                              </div>
+                              <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                            </div>
+                          </div>
+                        </li>
+                        <!-- Night 2 -->
+                        <li class="py-4 flex gap-4">
+                          <div class="w-10 shrink-0 text-center pt-0.5">
+                            <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">02</div>
+                          </div>
+                          <div class="grow flex justify-between items-start">
+                            <div>
+                              <h4 class="text-sm font-semibold text-stone-800">Tulia Amboseli Camp</h4>
+                              <p class="text-[10px] text-stone-400 mt-0.5">第二晚住宿</p>
+                            </div>
+                            <div class="text-right">
+                              <div class="relative inline-flex items-center">
+                                <span id="diff-detail-h1n2" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                                <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h1n2">145</span></span>
+                              </div>
+                              <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                            </div>
+                          </div>
+                        </li>
+                        <!-- Night 3 -->
+                        <li class="py-4 flex gap-4">
+                          <div class="w-10 shrink-0 text-center pt-0.5">
+                            <div class="text-[9px] uppercase tracking-widest text-stone-400">MAY</div><div class="text-xl font-light text-stone-800 leading-tight">03</div>
+                          </div>
+                          <div class="grow flex justify-between items-start">
+                            <div>
+                              <h4 class="text-sm font-semibold text-stone-800">Lake Nakuru Sopa Lodge</h4>
+                              <p class="text-[10px] text-stone-400 mt-0.5">第三晚住宿</p>
+                            </div>
+                            <div class="text-right">
+                              <div class="relative inline-flex items-center">
+                                <span id="diff-detail-h2n1" class="absolute -top-3 right-0 text-[10px] font-bold opacity-0 transition-all duration-300 transform translate-y-1 whitespace-nowrap"></span>
+                                <span class="text-sm font-semibold text-emerald-800">$<span id="val-detail-h2n1">155</span></span>
+                              </div>
+                              <span class="block text-[9px] text-stone-400 mt-0.5">/人晚</span>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- 区域 2：地接社服务详情 -->
+          <div class="mx-4 mt-6 mb-8 bg-[#f4efe6] rounded-[2rem] pt-8 px-5 pb-4 shadow-sm border border-stone-200/50 relative z-10">
+            <div class="mb-8 flex flex-col items-center text-center">
+              <div class="w-12 h-12 bg-[#1b3b36] text-[#e8ecd7] rounded-2xl flex items-center justify-center mb-3 shadow-lg transform -rotate-3 transition-transform duration-300 hover:rotate-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <h2 class="text-xl font-bold text-stone-800 tracking-tight">Provider Services</h2>
+              <p class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">服务保障与专属福利</p>
+            </div>
+
+            <div class="space-y-0">
+              <section class="py-5 border-t border-stone-200/60">
+                <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+                  <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest m-0">Value Adds</h3>
+                  <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </div>
+                <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+                  <div class="overflow-hidden">
+                    <div class="pt-5 px-1 space-y-5">
+                      <div class="flex gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-700 mt-0.5 shrink-0"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                        <div>
+                          <p id="label-included" class="text-sm font-semibold text-stone-800 mb-1">包含费用</p>
+                          <p id="text-included" class="text-xs text-stone-500 leading-relaxed"></p>
+                        </div>
+                      </div>
+                      <div class="flex gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-400 mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <div>
+                          <p id="label-excluded" class="text-sm font-semibold text-stone-800 mb-1">不含费用</p>
+                          <p id="text-excluded" class="text-xs text-stone-500 leading-relaxed"></p>
+                        </div>
+                      </div>
+                      <div id="perk-box" class="bg-[#ede8df] p-4 rounded-2xl flex items-start gap-3 border border-[#e5dfd5] transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[#a68a61] mt-0.5 shrink-0"><rect x="3" y="8" width="18" height="14" rx="2"/><path d="M12 5a3 3 0 1 0-3 3"/><path d="M15 8a3 3 0 1 0-3-3"/><path d="M12 8v14"/><path d="M3 15h18"/></svg>
+                        <div>
+                          <p id="label-perks" class="text-xs font-bold text-[#8a6e45] mb-1">专属福利赠送</p>
+                          <p id="text-perks" class="text-[11px] text-[#8a6e45]/80 leading-relaxed"></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="py-5 border-t border-stone-200/60">
+                <div class="collapsible-header flex justify-between items-center cursor-pointer group select-none">
+                  <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest m-0">Service Process</h4>
+                  <svg class="chevron transition-transform duration-300 w-4 h-4 text-stone-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                </div>
+                <div class="collapsible-content grid grid-rows-[1fr] transition-[grid-template-rows] duration-300">
+                  <div class="overflow-hidden">
+                    <div class="sopInteractiveCard">
+                      <div class="stageTabs" id="sopTabsContainer">
+                        <div class="stageTabItem is-active" data-index="0">
+                          <div class="stageDotWrapper"><div class="stageDot">1</div></div>
+                          <div class="stageName">预定前</div>
+                        </div>
+                        <div class="stageTabItem" data-index="1">
+                          <div class="stageDotWrapper"><div class="stageDot">2</div></div>
+                          <div class="stageName">出行前</div>
+                        </div>
+                        <div class="stageTabItem" data-index="2">
+                          <div class="stageDotWrapper"><div class="stageDot">3</div></div>
+                          <div class="stageName">出行中</div>
+                        </div>
+                        <div class="stageTabItem" data-index="3">
+                          <div class="stageDotWrapper"><div class="stageDot">4</div></div>
+                          <div class="stageName">出行后</div>
+                        </div>
+                      </div>
+                      <div class="subNodeStepper" id="sopContentContainer">
+                        <div class="sop-animate-fade">
+                          <div class="subNodeItem">
+                            <div class="stepperDot"><div class="stepperDotInner"></div></div>
+                            <div class="stepperContent">
+                              <div class="stepperTitle">需求沟通</div>
+                              <div class="stepperDesc">1对1管家深入了解您的出行偏好与预算</div>
+                            </div>
+                          </div>
+                          <div class="subNodeItem">
+                            <div class="stepperDot"><div class="stepperDotInner"></div></div>
+                            <div class="stepperContent">
+                              <div class="stepperTitle">方案定制</div>
+                              <div class="stepperDesc">24小时内输出专属行程规划与报价明细</div>
+                            </div>
+                          </div>
+                          <div class="subNodeItem">
+                            <div class="stepperDot"><div class="stepperDotInner"></div></div>
+                            <div class="stepperContent">
+                              <div class="stepperTitle">确认签约</div>
+                              <div class="stepperDesc">线上确认行程，签署正规电子旅游合同</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <!-- 区域 3：行程概览 -->
+          <div class="mx-4 mt-6 mb-8 bg-white rounded-[2rem] pt-8 px-5 pb-6 shadow-sm border border-stone-200/50 relative z-10">
+            <div class="mb-8 flex flex-col items-center text-center">
+              <div class="w-12 h-12 bg-[#1b3b36] text-[#e8ecd7] rounded-2xl flex items-center justify-center mb-3 shadow-lg transform -rotate-3 transition-transform duration-300 hover:rotate-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </div>
+              <h2 class="text-xl font-bold text-stone-800 tracking-tight">Brief Itinerary</h2>
+              <p class="text-[10px] text-stone-500 uppercase tracking-widest mt-1">精简版游猎动线</p>
+            </div>
+
+            <div class="px-1">
+              <div class="space-y-6">
+                <!-- Day 1 -->
+                <div class="relative pl-6">
+                  <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+                  <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+                  <div class="-mt-1">
+                    <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/01</span><span class="text-sm font-semibold text-stone-800">Nairobi ➔ Amboseli</span></div>
+                    <div class="flex gap-4 text-[10px] text-stone-400 mb-3 uppercase tracking-wider">
+                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>240 km</span>
+                      <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>4-5 hrs</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Day 2 -->
+                <div class="relative pl-6">
+                  <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+                  <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+                  <div class="-mt-1">
+                    <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/02</span><span class="text-sm font-semibold text-stone-800">Amboseli 全天深度游猎</span></div>
+                  </div>
+                </div>
+                <!-- Day 3 -->
+                <div class="relative pl-6">
+                  <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+                  <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+                  <div class="-mt-1">
+                    <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/03</span><span class="text-sm font-semibold text-stone-800">Amboseli ➔ Lake Nakuru</span></div>
+                  </div>
+                </div>
+                <!-- Day 4 -->
+                <div class="relative pl-6">
+                  <div class="absolute left-[3px] top-5 bottom-[-1.5rem] w-[1px] bg-stone-300/50"></div>
+                  <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+                  <div class="-mt-1">
+                    <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/04</span><span class="text-sm font-semibold text-stone-800">Lake Nakuru ➔ Maasai Mara</span></div>
+                  </div>
+                </div>
+                <!-- Day 10 -->
+                <div class="relative pl-6">
+                  <div class="absolute -left-[1px] top-1.5 w-[9px] h-[9px] rounded-full bg-emerald-800 ring-2 ring-white"></div>
+                  <div class="-mt-1">
+                    <div class="flex items-baseline gap-2 mb-1"><span class="text-xs font-semibold text-stone-800 font-mono">05/10</span><span class="text-sm font-semibold text-stone-800">送机启程 ➔ 温暖的家</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部悬浮操作区 -->
+          <div class="mt-6 px-5 pb-12 text-center relative z-10">
+            <p class="text-[10px] text-stone-400 uppercase tracking-widest mb-4">Valid Until 2026/05/30</p>
+            <button onclick="openServiceQR()" class="w-full bg-stone-900 text-white font-medium py-4 rounded-2xl shadow-xl shadow-stone-900/20 active:scale-95 transition-transform flex justify-center items-center gap-2">
+              联系客服确认行程 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-400"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <!-- 底部地接社列表抽屉 (使用 absolute 以防超出模拟框) -->
+          <div id="agency-sheet" class="hidden">
+            <div id="agency-sheet-backdrop" class="absolute inset-0 bg-stone-900/60 z-40 backdrop-blur-sm transition-opacity opacity-0 duration-300 ease-out"></div>
+            <div id="agency-sheet-content" class="absolute bottom-0 left-0 right-0 max-w-md mx-auto bg-white rounded-t-[2rem] z-50 p-6 shadow-2xl pb-10 border-t border-stone-200/50 transform translate-y-full transition-transform duration-500" style="transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);">
+              <div class="w-12 h-1.5 bg-stone-200 rounded-full mx-auto mb-6"></div>
+              <div class="flex justify-between items-center mb-6">
+                <h3 class="text-base font-semibold text-stone-800">全部服务提供商</h3>
+                <button id="close-agency-sheet" class="p-1.5 text-stone-400 hover:bg-stone-100 rounded-full transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="space-y-3 relative max-h-[50vh] overflow-y-auto no-scrollbar" id="agency-list-sheet"></div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      <!-- 报价单 HTML 结束 -->
+
+    </div>
+
+  </div>
+
+  <script>
+    /* ========================================= */
+    /* ======== Bot 聊天界面的原生 JS ======== */
+    /* ========================================= */
+    document.addEventListener('DOMContentLoaded', () => {
+      // === Provider Sticky (JS) ===
+      const providerSection = document.getElementById('providerSection');
+      const providerSpacer = document.getElementById('providerSpacer');
+      const scrollContainer = document.querySelector('.quoteScrollContainer');
+      if (providerSection && scrollContainer) {
+        let providerOriginalTop = 0;
+        let isStuck = false;
+        let hasCalculated = false;
+        function calcOriginalTop() {
+          const scrollRect = scrollContainer.getBoundingClientRect();
+          const provRect = providerSection.getBoundingClientRect();
+          providerOriginalTop = provRect.top - scrollRect.top + scrollContainer.scrollTop;
+          hasCalculated = true;
+        }
+        function handleProviderSticky() {
+          if (!hasCalculated) calcOriginalTop();
+          const scrollTop = scrollContainer.scrollTop;
+          const shouldStick = scrollTop >= providerOriginalTop;
+          if (shouldStick && !isStuck) {
+            isStuck = true;
+            providerSpacer.style.height = providerSection.offsetHeight + 'px';
+            providerSpacer.classList.add('is-active');
+            providerSection.classList.add('is-stuck');
+          } else if (!shouldStick && isStuck) {
+            isStuck = false;
+            providerSpacer.classList.remove('is-active');
+            providerSpacer.style.height = '';
+            providerSection.classList.remove('is-stuck');
+          }
+        }
+        scrollContainer.addEventListener('scroll', handleProviderSticky, { passive: true });
+        const quoteOverlay = document.getElementById('quotePageOverlay');
+        if (quoteOverlay) {
+          const obs = new MutationObserver(() => {
+            if (quoteOverlay.classList.contains('active')) {
+              setTimeout(() => { calcOriginalTop(); handleProviderSticky(); }, 100);
+            } else {
+              isStuck = false;
+              hasCalculated = false;
+              providerOriginalTop = 0;
+              providerSpacer.classList.remove('is-active');
+              providerSpacer.style.height = '';
+              providerSection.classList.remove('is-stuck');
+            }
+          });
+          obs.observe(quoteOverlay, { attributes: true, attributeFilter: ['class'] });
+        }
+      }
+      const budgetCarousel = document.getElementById('budgetCarousel');
+      setTimeout(() => {
+        if(budgetCarousel) {
+          const highlightCard = document.getElementById('highlightCard');
+          if(highlightCard) {
+            highlightCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
+        }
+      }, 300);
+
+      if (budgetCarousel) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        budgetCarousel.addEventListener('mousedown', (e) => {
+          isDown = true;
+          startX = e.pageX - budgetCarousel.offsetLeft;
+          scrollLeft = budgetCarousel.scrollLeft;
+          budgetCarousel.style.scrollSnapType = 'none';
+          budgetCarousel.style.scrollBehavior = 'auto';
+        });
+        budgetCarousel.addEventListener('mouseleave', () => {
+          if (!isDown) return;
+          isDown = false;
+          budgetCarousel.style.scrollSnapType = 'x mandatory';
+          budgetCarousel.style.scrollBehavior = 'smooth';
+        });
+        budgetCarousel.addEventListener('mouseup', () => {
+          if (!isDown) return;
+          isDown = false;
+          budgetCarousel.style.scrollSnapType = 'x mandatory';
+          budgetCarousel.style.scrollBehavior = 'smooth';
+        });
+        budgetCarousel.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - budgetCarousel.offsetLeft;
+          const walk = (x - startX) * 1.5; 
+          budgetCarousel.scrollLeft = scrollLeft - walk;
+        });
+      }
+    });
+
+    let currentPlanName = '专属定制方案';
+    let currentQRBudget = '$400-$1,500';
+    let currentQRCountry = 'kenya';
+    let qrToastTimer = null;
+
+    function showQRToast(text) {
+      const toast = document.getElementById('qrToast');
+      if (!toast) return;
+      toast.innerHTML = text;
+      toast.classList.remove('show');
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      clearTimeout(qrToastTimer);
+      qrToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function openQR(budget) {
+      if (budget) currentQRBudget = budget;
+      currentQRCountry = 'kenya';
+      document.querySelectorAll('.qrCountryTab').forEach(t => t.classList.toggle('is-active', t.dataset.country === 'kenya'));
+      updateQRContent();
+      document.getElementById('qrOverlay').classList.add('active');
+      showQRToast('"NeekTrip肯尼亚落地团<br>预算:' + currentQRBudget.replace(/\$/g, '') + '$"<br>已复制到黏贴板');
+    }
+
+    function switchQRTab(country) {
+      currentQRCountry = country;
+      document.querySelectorAll('.qrCountryTab').forEach(t => t.classList.toggle('is-active', t.dataset.country === country));
+      updateQRContent();
+      const countryName = country === 'kenya' ? '肯尼亚' : '坦桑尼亚';
+      showQRToast('"NeekTrip' + countryName + '落地团<br>预算:' + currentQRBudget.replace(/\$/g, '') + '$"<br>已复制到黏贴板');
+    }
+
+    function updateQRContent() {
+      const imageEl = document.getElementById('qrModalImage');
+      if (currentQRCountry === 'kenya') {
+        imageEl.src = './qr-kenya.png';
+      } else {
+        imageEl.src = './qr-tanzania.png';
+      }
+    }
+
+    function closeQR(e) {
+      if (e && e.target !== document.getElementById('qrOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('qrOverlay').classList.remove('active');
+    }
+
+    function openAdvisorQR() {
+      document.getElementById('advisorQrOverlay').classList.add('active');
+      showQRToast('"NeekTrip非洲顶奢定制<br>预算:7500+$"<br>已复制到黏贴板');
+    }
+    function closeAdvisorQR(e) {
+      if (e && e.target !== document.getElementById('advisorQrOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('advisorQrOverlay').classList.remove('active');
+    }
+
+    function openServiceQR() {
+      var nickname = document.getElementById('quote-guest-name') ? document.getElementById('quote-guest-name').textContent : '旅行者';
+      var destination = document.getElementById('quote-destination') ? document.getElementById('quote-destination').textContent : '肯尼亚';
+      var departure = document.getElementById('quote-departure') ? document.getElementById('quote-departure').textContent : '未定';
+      var guests = document.getElementById('quote-guests') ? document.getElementById('quote-guests').textContent : '-';
+      var duration = document.getElementById('quote-duration') ? document.getElementById('quote-duration').textContent : '-';
+      var budget = document.getElementById('quote-budget') ? document.getElementById('quote-budget').textContent : '-';
+      var quoteLink = window.location.href;
+      var copyText = 'NeekTrip定制\n昵称：' + nickname + '\n目的地：' + destination + '\n出发日期：' + departure + '\n人数：' + guests + '\n天数：' + duration + '\n预算区间：' + budget + '\nBOT报价链接：' + quoteLink;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(copyText);
+      }
+      document.getElementById('serviceQrOverlay').classList.add('active');
+      var toastHtml = '"NeekTrip定制<br>昵称：' + nickname + '<br>目的地：' + destination + '<br>出发日期：' + departure + '<br>人数：' + guests + '<br>天数：' + duration + '<br>预算区间：' + budget + '<br>BOT报价链接：' + quoteLink + '"<br>已复制到黏贴板';
+      showQRToast(toastHtml);
+    }
+    function closeServiceQR(e) {
+      if (e && e.target !== document.getElementById('serviceQrOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('serviceQrOverlay').classList.remove('active');
+    }
+
+    function openForm(minStr = '', maxStr = '', planName = '专属定制方案') {
+      currentPlanName = planName;
+      document.getElementById('f_budget_min').value = minStr;
+      document.getElementById('f_budget_max').value = maxStr;
+      document.getElementById('formOverlay').classList.add('active');
+    }
+    function closeDrawer(e) {
+      if (e && e.target !== document.getElementById('formOverlay') && !e.target.classList.contains('closeBtn')) return;
+      document.getElementById('formOverlay').classList.remove('active');
+    }
+
+    let plansData = []; 
+    let activePlanIndex = 0; 
+    let isCollapsed = true;
+    let pendingQuotePlanIndex = -1; 
+    let lockedQuoteId = null; 
+
+    function updatePlanButtonsState() {
+      const buttons = document.querySelectorAll('.cardCTA');
+      const currentPlanNames = plansData.map(p => p.planName);
+      const isFull = plansData.length >= 3;
+
+      buttons.forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes('openQR(') || onclickAttr.includes('openAdvisorQR(')) return; 
+
+        let isAdded = false;
+        for (let name of currentPlanNames) {
+          if (onclickAttr.includes(name)) {
+            isAdded = true;
+            break;
+          }
+        }
+        if (isAdded || isFull) {
+          btn.classList.add('cta--disabled');
+        } else {
+          btn.classList.remove('cta--disabled');
+        }
+      });
+    }
+
+    function submitForm() {
+      const nickname = document.getElementById('f_nickname').value || '';
+      const dest = document.getElementById('f_destination').value || '未填';
+      const date = document.getElementById('f_date').value || '未定';
+      const people = document.getElementById('f_people').value || '-';
+      const days = document.getElementById('f_days').value || '-';
+      const min = document.getElementById('f_budget_min').value || '0';
+      const max = document.getElementById('f_budget_max').value || '0';
+
+      let proText = "体验优质", conText = "需合理安排时间";
+      if (currentPlanName.includes("入门")) { proText = "价格便宜，覆盖经典"; conText = "车内拥挤，行程较赶"; }
+      else if (currentPlanName.includes("经典")) { proText = "性价比高，体验均衡"; conText = "赶路较长，节奏偏快"; }
+      else if (currentPlanName.includes("深度")) { proText = "节奏轻松，沉浸自然"; conText = "价格偏高，部分车程长"; }
+      else if (currentPlanName.includes("轻奢")) { proText = "体验私密，活动丰富"; conText = "小飞机限重严格"; }
+      else if (currentPlanName.includes("奢华")) { proText = "独享资源，顶级视野"; conText = "需提前半年预定"; }
+
+      const params = { nickname, destination: dest, date, people, days, min, max };
+
+      let existingIndex = plansData.findIndex(p => p.planName === currentPlanName);
+
+      if (existingIndex !== -1) {
+          plansData[existingIndex] = { ...plansData[existingIndex], params, proText, conText };
+          activePlanIndex = existingIndex;
+      } else {
+          if (plansData.length >= 3) {
+              appendChatBubble("最多只能添加 3 种对比方案哦！");
+              closeDrawer();
+              return;
+          }
+          plansData.push({
+              planName: currentPlanName,
+              params: params, proText, conText,
+              quotes: [] 
+          });
+          activePlanIndex = plansData.length - 1;
+      }
+
+      isCollapsed = true; 
+      renderBookmarkUI();
+      closeDrawer();
+      updatePlanButtonsState();
+
+      appendChatBubble(`${currentPlanName} 基础信息已记录。`, true, activePlanIndex);
+    }
+
+    function renderBookmarkUI() {
+      const container = document.getElementById('profileBookmarkContainer');
+      if(plansData.length === 0) {
+          container.innerHTML = '';
+          return;
+      }
+
+      const activePlan = plansData[activePlanIndex];
+
+      let tabsHtml = '';
+      plansData.forEach((p, idx) => {
+          const isActive = idx === activePlanIndex ? 'active' : '';
+          const deleteHtml = isActive ? `<span class="delete-btn" onclick="deletePlan(event, ${idx})">&times;</span>` : '';
+          tabsHtml += `<div class="bm-plan-tab ${isActive}" onclick="switchPlanTab(event, ${idx})">${p.planName}${deleteHtml}</div>`;
+      });
+
+      let displayQuote = null;
+      if (activePlan.quotes.length > 0) {
+        displayQuote = activePlan.quotes.find(q => q.id === lockedQuoteId) || activePlan.quotes[0];
+      }
+      
+      let displayParams = displayQuote ? displayQuote.params : activePlan.params;
+
+      let quotesHtml = '';
+      if (activePlan.quotes.length > 0) {
+        quotesHtml = '<div class="inline-quotes-list">';
+        activePlan.quotes.forEach(q => {
+          let isLocked = lockedQuoteId === q.id;
+          let lockClass = isLocked ? 'is-locked' : '';
+          let lockSvg = isLocked 
+            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>` 
+            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+
+          let deleteSvg = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`;
+
+          quotesHtml += `
+            <div class="inline-quote-card">
+              <div class="inline-quote-left" onclick="openQuotePage(${activePlanIndex}, null, true)">
+                <span class="inline-quote-title">报价单号 #${q.id} <span class="inline-quote-subtitle">(${q.params.date} · ${q.params.people}人 · ${q.params.days}天)</span></span>
+                <div class="inline-quote-price">${q.price}</div>
+              </div>
+              <div class="inline-quote-actions">
+                <div class="inline-quote-lock ${lockClass}" title="专门针对当前报价修改" onclick="toggleLock(event, '${q.id}')">
+                  ${lockSvg}
+                </div>
+                <div class="inline-quote-delete" title="删除此报价" onclick="deleteQuote(event, '${q.id}')">
+                  ${deleteSvg}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        quotesHtml += '</div>';
+      }
+
+      const editIcon = `<svg class="edit-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="点击数值修改"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+
+      let contentHtml = `
+        <div class="bm-budget-top">
+          <span class="bm-label">预算区间</span>
+          <span class="bm-val-large">${displayParams.min} - ${displayParams.max}</span>
+        </div>
+        <div class="bookmark-grid">
+          <div class="bm-item">
+            <span class="bm-label">目的地</span>
+            <span class="bm-val">${displayParams.destination}</span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">出发日期${editIcon}</span>
+            <span class="bm-val"><input type="date" class="edit-date-input" data-field="date" value="${displayParams.date}" onchange="handleProfileEdit(event)" /></span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">出行人数${editIcon}</span>
+            <span class="bm-val"><span class="edit-area" contenteditable="true" data-field="people" onblur="handleProfileEdit(event)" onkeydown="handleKeydown(event)">${displayParams.people}</span>人</span>
+          </div>
+          <div class="bm-item">
+            <span class="bm-label">游玩天数${editIcon}</span>
+            <span class="bm-val"><span class="edit-area" contenteditable="true" data-field="days" onblur="handleProfileEdit(event)" onkeydown="handleKeydown(event)">${displayParams.days}</span>天</span>
+          </div>
+        </div>
+        <div class="bm-hints">
+          <span class="bm-hint-pro">✔ ${activePlan.proText}</span>
+          <span class="bm-hint-con">✖ ${activePlan.conText}</span>
+        </div>
+        <div class="bm-quotes-header">
+          <span class="bm-quotes-title">历史报价</span>
+        </div>
+        ${quotesHtml}
+      `;
+
+      const collapseClass = isCollapsed ? 'collapsed' : '';
+      const arrowRot = isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+
+      container.innerHTML = `
+        <div class="profile-bookmark-wrapper ${collapseClass}">
+          <div class="bookmark-header">
+            <div class="bm-tabs-wrapper">${tabsHtml}</div>
+            <div class="bm-toggle-btn" onclick="toggleBookmark()">
+                <span class="tab-arrow" style="transform: ${arrowRot};">▲</span>
+            </div>
+          </div>
+          <div class="bookmark-content" style="max-height: ${isCollapsed ? '0' : '400px'}; overflow-y: auto;">
+            ${contentHtml}
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        const activeTab = container.querySelector('.bm-plan-tab.active');
+        if (activeTab) {
+          activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }, 50);
+    }
+
+    function handleKeydown(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.target.blur();
+      }
+    }
+
+    function handleProfileEdit(e) {
+      const el = e.target;
+      const field = el.getAttribute('data-field');
+      let newValue = el.tagName === 'INPUT' ? el.value : el.innerText.trim().replace(/\n/g, ''); 
+      const activePlan = plansData[activePlanIndex];
+
+      if (!activePlan) return;
+
+      let displayQuote = null;
+      if (activePlan.quotes.length > 0) {
+        displayQuote = activePlan.quotes.find(q => q.id === lockedQuoteId) || activePlan.quotes[0];
+      }
+
+      let baseParams = displayQuote ? displayQuote.params : activePlan.params;
+      let oldVal = baseParams[field];
+
+      if (!newValue || newValue === oldVal) {
+        el.innerText = oldVal;
+        return;
+      }
+
+      const newParams = { ...baseParams, [field]: newValue };
+      const priceStr = generatePriceForPlan(newParams);
+
+      const newQuote = {
+        id: Date.now().toString().slice(-4),
+        price: priceStr,
+        params: newParams
+      };
+
+      activePlan.quotes.unshift(newQuote);
+      lockedQuoteId = newQuote.id;
+
+      let fieldName = field === 'date' ? '出发日期' : field === 'people' ? '出行人数' : field === 'days' ? '游玩天数' : '目的地';
+      appendChatBubble(`收到！您将 ${fieldName} 调整为了 <b>${newValue}</b>。系统已实时为您核算了最新报价单，锁已自动移至最新报价哦~`);
+
+      renderBookmarkUI();
+    }
+
+    function generatePriceForPlan(params) {
+        const min = parseInt(params.min.replace(/[^0-9]/g, '') || 0);
+        const max = parseInt(params.max.replace(/[^0-9]/g, '') || 0);
+        let priceNum = 0;
+        if(min && max) priceNum = Math.floor(Math.random() * (max - min + 1)) + min;
+        else if(min) priceNum = min + Math.floor(Math.random() * 500);
+        else priceNum = 2000 + Math.floor(Math.random() * 1000);
+        return '$' + priceNum.toLocaleString();
+    }
+
+    function toggleBookmark() {
+      isCollapsed = !isCollapsed;
+      renderBookmarkUI();
+    }
+
+    function switchPlanTab(e, idx) {
+      e.stopPropagation();
+      activePlanIndex = idx;
+      isCollapsed = false; 
+      renderBookmarkUI();
+    }
+
+    function toggleLock(e, quoteId) {
+        e.stopPropagation();
+        if (lockedQuoteId === quoteId) {
+            lockedQuoteId = null; 
+        } else {
+            lockedQuoteId = quoteId; 
+        }
+        renderBookmarkUI();
+    }
+
+    function deleteQuote(e, quoteId) {
+        e.stopPropagation();
+        const activePlan = plansData[activePlanIndex];
+        activePlan.quotes = activePlan.quotes.filter(q => q.id !== quoteId);
+        if (lockedQuoteId === quoteId) {
+            lockedQuoteId = null;
+        }
+        renderBookmarkUI();
+    }
+
+    function deletePlan(e, idx) {
+        e.stopPropagation(); 
+        plansData.splice(idx, 1);
+        if (plansData.length === 0) {
+            activePlanIndex = 0;
+            isCollapsed = true;
+            document.getElementById('profileBookmarkContainer').innerHTML = '';
+        } else {
+            if (activePlanIndex >= plansData.length) activePlanIndex = plansData.length - 1; 
+            renderBookmarkUI();
+        }
+        updatePlanButtonsState();
+    }
+
+    /* 开启真实报价单页面 */
+    function openQuotePage(planIndex, btnNode, isReview) {
+        if(btnNode) {
+             btnNode.innerText = '已查看';
+             btnNode.style.pointerEvents = 'none';
+             btnNode.style.opacity = '0.6';
+        }
+        if (isReview) {
+          pendingQuotePlanIndex = -1;
+        } else {
+          pendingQuotePlanIndex = planIndex;
+        }
+
+        // 从当前 plan 的 params 填充报价单头部参数
+        const plan = plansData[planIndex];
+        if (plan) {
+          const p = plan.params;
+          const nameEl = document.getElementById('quote-guest-name');
+          const destEl = document.getElementById('quote-destination');
+          const depEl = document.getElementById('quote-departure');
+          const durEl = document.getElementById('quote-duration');
+          const guestEl = document.getElementById('quote-guests');
+          const budgetEl = document.getElementById('quote-budget');
+          if (nameEl) nameEl.textContent = p.nickname || '旅行者';
+          if (destEl) destEl.textContent = p.destination || '肯尼亚';
+          if (depEl) depEl.textContent = p.date && p.date !== '未定' ? p.date.replace(/-/g, '/') : '未定';
+          if (durEl) durEl.textContent = p.days && p.days !== '-' ? p.days + '天' : '-天';
+          if (guestEl) guestEl.textContent = p.people && p.people !== '-' ? p.people + '人' : '-人';
+          if (budgetEl) budgetEl.textContent = (p.min && p.max) ? (p.min + ' - ' + p.max) : '-';
+        }
+
+        // 显示新集成的报价单面板
+        document.getElementById('quotePageOverlay').classList.add('active');
+        
+        // 触发一次 resize 计算以防走马灯宽未加载好
+        window.dispatchEvent(new Event('resize')); 
+    }
+
+    function closeQuotePage() {
+        document.getElementById('quotePageOverlay').classList.remove('active');
+
+        if (pendingQuotePlanIndex !== -1) {
+            const plan = plansData[pendingQuotePlanIndex];
+            const priceStr = generatePriceForPlan(plan.params);
+            
+            const q = { 
+                id: Date.now().toString().slice(-4), 
+                price: priceStr,
+                params: { ...plan.params }
+            };
+            
+            plan.quotes.unshift(q); 
+            lockedQuoteId = q.id;
+
+            activePlanIndex = pendingQuotePlanIndex; 
+            isCollapsed = false; 
+            renderBookmarkUI();
+            
+            appendChatBubble(`新生成的报价单已同步到您的出行档案卡中！如果后续行程人数或天数有变，您可以直接在上方卡片点击数值进行修改，我会实时更新报价。`);
+            pendingQuotePlanIndex = -1;
+        }
+    }
+
+    function appendChatBubble(text, showQuoteBtn = false, planIndex = 0) {
+      const scrollArea = document.getElementById('chatHistory');
+      let btnHtml = '';
+      if (showQuoteBtn) {
+          btnHtml = `<div class="chat-btn" onclick="openQuotePage(${planIndex}, this)">查看详细报价单</div>`;
+      }
+      
+      const html = `
+        <div class="chat-msg-row">
+          <div class="chat-avatar">N</div>
+          <div class="chat-bubble">
+            ${text}
+            ${btnHtml}
+          </div>
+        </div>
+      `;
+      scrollArea.insertAdjacentHTML('beforeend', html);
+      
+      const chatPage = document.getElementById('chatPage');
+      chatPage.scrollTo({
+        top: chatPage.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+
+    /* ========================================= */
+    /* ======== 报价界面的原生 JS ======== */
+    /* ========================================= */
+    let lang = '中';
+    const langToggleBtn = document.getElementById('lang-toggle');
+    const langTextSpan = document.getElementById('lang-text');
+    langToggleBtn.addEventListener('click', () => {
+      lang = lang === '中' ? 'EN' : '中';
+      langTextSpan.textContent = lang === '中' ? '中 / EN' : 'EN / 中';
+    });
+
+    const agencyPrices = {
+      1: { total: 2614, transport: 875, transportDaily: 125, accommodation: 959, h1n1: 132, h1n2: 145, h2n1: 155, activities: 530, service: 300 },
+      2: { total: 2464, transport: 825, transportDaily: 118, accommodation: 859, h1n1: 120, h1n2: 130, h2n1: 140, activities: 530, service: 250 },
+      3: { total: 2394, transport: 855, transportDaily: 122, accommodation: 809, h1n1: 115, h1n2: 125, h2n1: 135, activities: 480, service: 250 },
+      4: { total: 2954, transport: 975, transportDaily: 139, accommodation: 1159, h1n1: 160, h1n2: 175, h2n1: 190, activities: 530, service: 290 },
+      5: { total: 2214, transport: 775, transportDaily: 110, accommodation: 759, h1n1: 105, h1n2: 115, h2n1: 120, activities: 480, service: 200 }
+    };
+
+    const agencies = [
+      { id: 1, name: 'LionRoar Safari 狮吼东非', logo: '🦁', rating: '5.0', label: 'Premium', services: {
+          included: "每人每天3L饮用水、所有税费、国家公园向导费",
+          excluded: "国际航班往返机票、肯尼亚入境签证费、司机与向导小费",
+          perks: "赠送 AMREF 飞行救援险\n内罗毕首日五星级住宿（价值 $150）"
+      }},
+      { id: 2, name: 'Savanna Trek 萨凡纳旅行', logo: '🐘', rating: '4.9', label: 'Popular', services: {
+          included: "每人每天2L饮用水、所有税费、公园向导费",
+          excluded: "往返机票、电子签证费、自理餐饮、向导小费",
+          perks: "赠送 SAFARICOM 当地电话卡\n内罗毕希尔顿酒店首日住宿"
+      }},
+      { id: 3, name: 'Kilimanjaro Dreams 之梦', logo: '🏔️', rating: '4.8', label: 'Classic', services: {
+          included: "每日无限供应饮用水、所有税费、向导费",
+          excluded: "国际机票、签证费、个人保险、小费",
+          perks: "赠送 Safari 草帽及望远镜租借\n内罗毕首日机场附近四星级住宿"
+      }},
+      { id: 4, name: 'Serengeti Pioneers 探索者', logo: '🐆', rating: '4.9', label: 'Adventure', services: {
+          included: "每人每天4L饮用水、全包门费、专业中文向导",
+          excluded: "机票、签证、酒精饮料、向导及搬运工小费",
+          perks: "赠送 AMREF 飞行救援险 + 全程专业摄影服务\n内罗毕海明威酒店首日住宿"
+      }},
+      { id: 5, name: 'Mara Experts 马赛马拉专家', logo: '🦒', rating: '4.7', label: 'Local', services: {
+          included: "每人每天2L饮用水、所有国家公园门票",
+          excluded: "国际/国内航段机票、签证、小费、行程外活动",
+          perks: "赠送 马赛马拉当地纪念工艺品一份\n内罗毕首日经济型快捷酒店"
+      }},
+    ];
+    
+    let selectedAgencyId = 1, baseAgencyId = 1;     
+    const carouselContainer = document.getElementById('agency-carousel'), carouselDotsContainer = document.getElementById('carousel-dots');
+    let cardElements = [], isDragging = false; 
+
+    function getDiffHTML(sel, base) {
+      if (sel === base || !base) return sel;
+      const matrix = Array(sel.length + 1).fill().map(() => Array(base.length + 1).fill(0));
+      for (let i = 1; i <= sel.length; i++) {
+        for (let j = 1; j <= base.length; j++) {
+          if (sel[i-1] === base[j-1]) matrix[i][j] = matrix[i-1][j-1] + 1;
+          else matrix[i][j] = Math.max(matrix[i-1][j], matrix[i][j-1]);
+        }
+      }
+      let i = sel.length, j = base.length, res = [];
+      while (i > 0 || j > 0) {
+        if (i > 0 && j > 0 && sel[i-1] === base[j-1]) { res.push({ char: sel[i-1], diff: false }); i--; j--; }
+        else if (j > 0 && (i === 0 || matrix[i][j-1] >= matrix[i-1][j])) { j--; }
+        else { res.push({ char: sel[i-1], diff: true }); i--; }
+      }
+      return res.reverse().map(item => item.diff ? `<span class="text-red-500 font-bold">${item.char}</span>` : item.char).join('');
+    }
+
+    function initAgencyCarousel() {
+      carouselContainer.innerHTML = ''; carouselDotsContainer.innerHTML = ''; cardElements = [];
+      agencies.forEach(agency => {
+        const card = document.createElement('div');
+        card.dataset.id = agency.id;
+        card.className = 'agency-card w-[85%] shrink-0 snap-center cursor-grab select-none rounded-2xl p-4 flex items-center justify-between transition-all duration-300 bg-white border-2 border-transparent shadow-sm';
+        card.innerHTML = `
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="agency-logo w-12 h-12 shrink-0 bg-stone-50 border border-stone-100 rounded-full flex items-center justify-center text-2xl shadow-sm transition-transform duration-300">${agency.logo}</div>
+            <div class="text-left flex-1 min-w-0 mt-0.5">
+              <div class="flex items-center justify-between mb-0.5">
+                 <p class="agency-label text-[10px] font-bold uppercase tracking-wider transition-colors duration-300">${agency.label}</p>
+                 <span class="agency-rating text-[10px] text-stone-500 flex items-center gap-0.5 transition-colors duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-yellow-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${agency.rating}</span>
+              </div>
+              <p class="agency-name text-sm truncate transition-colors duration-300">${agency.name}</p>
+            </div>
+          </div>
+          <div class="relative flex items-center justify-end z-20 shrink-0"><button class="lock-btn p-2 -mr-2 shrink-0 rounded-full transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-90"></button></div>`;
+        const lockBtn = card.querySelector('.lock-btn');
+        lockBtn.addEventListener('click', (e) => { e.stopPropagation(); baseAgencyId = agency.id; updateCarouselVisuals(); updateAllUI(); });
+        card.addEventListener('click', () => { if (!isDragging) card.scrollIntoView({ behavior: 'smooth', inline: 'center' }); });
+        carouselContainer.appendChild(card); cardElements.push({ id: agency.id, element: card });
+        // dots created as fixed 3 below
+      });
+      for (let i = 0; i < 3; i++) {
+        const d = document.createElement('div');
+        d.id = 'dot-' + i;
+        d.className = 'transition-all duration-300 rounded-full bg-stone-300 h-1.5 w-1.5';
+        carouselDotsContainer.appendChild(d);
+      }
+      updateCarouselVisuals(); updateAllUI();
+
+      let isDown = false, startX, scrollLeft;
+      carouselContainer.addEventListener('mousedown', (e) => { isDown = true; isDragging = false; startX = e.pageX - carouselContainer.offsetLeft; scrollLeft = carouselContainer.scrollLeft; });
+      carouselContainer.addEventListener('mouseleave', () => isDown = false);
+      carouselContainer.addEventListener('mouseup', () => isDown = false);
+      carouselContainer.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const walk = (e.pageX - carouselContainer.offsetLeft - startX) * 1.5; if (Math.abs(walk) > 5) isDragging = true; carouselContainer.scrollLeft = scrollLeft - walk; });
+      carouselContainer.addEventListener('scroll', () => {
+        const containerRect = carouselContainer.getBoundingClientRect(); const containerCenter = containerRect.left + containerRect.width / 2;
+        let closestId = selectedAgencyId, minDistance = Infinity;
+        cardElements.forEach(item => {
+          const cardCenter = item.element.getBoundingClientRect().left + item.element.getBoundingClientRect().width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+          if (distance < minDistance) { minDistance = distance; closestId = item.id; }
+        });
+        if (closestId !== selectedAgencyId) { selectedAgencyId = closestId; updateCarouselVisuals(); updateAllUI(); }
+      });
+    }
+
+    const formatNum = (num) => num.toLocaleString('en-US');
+
+    function updateAllUI() {
+      const sel = agencies.find(a => a.id === selectedAgencyId);
+      const base = agencies.find(a => a.id === baseAgencyId);
+      const selPrices = agencyPrices[selectedAgencyId];
+      const basePrices = agencyPrices[baseAgencyId];
+
+      const priceFields = [
+        { key: 'total', prefix: '' }, { key: 'transport', prefix: '' }, { key: 'accommodation', prefix: '' },
+        { key: 'activities', prefix: '' }, { key: 'service', prefix: '' }, { key: 'transport', prefix: 'detail-' },
+        { key: 'transportDaily', prefix: 'detail-' }, 
+        { key: 'h1n1', prefix: 'detail-' }, { key: 'h1n2', prefix: 'detail-' }, { key: 'h2n1', prefix: 'detail-' }
+      ];
+
+      priceFields.forEach(field => {
+        const priceEl = document.getElementById(`val-${field.prefix}${field.key}`);
+        if (priceEl) priceEl.textContent = formatNum(selPrices[field.key]);
+        const diffEl = document.getElementById(`diff-${field.prefix}${field.key}`);
+        if (diffEl) {
+          const diff = selPrices[field.key] - basePrices[field.key];
+          diffEl.className = `absolute right-0 text-[10px] font-bold transition-all duration-300 transform whitespace-nowrap ${field.key === 'total' && field.prefix === '' ? '-top-3 -right-12 text-sm' : '-top-3'}`;
+          if (diff === 0) diffEl.classList.add('opacity-0', 'translate-y-1');
+          else {
+            diffEl.textContent = diff > 0 ? `+${formatNum(diff)}` : `${formatNum(diff)}`;
+            diffEl.classList.add('opacity-100', 'translate-y-0', diff > 0 ? 'text-red-400' : 'text-emerald-500');
+          }
+        }
+      });
+
+      const serviceKeys = ['included', 'excluded', 'perks'];
+      serviceKeys.forEach(key => {
+        const textEl = document.getElementById(`text-${key}`);
+        const selVal = sel.services[key];
+        const baseVal = base.services[key];
+        if (selectedAgencyId !== baseAgencyId) textEl.innerHTML = getDiffHTML(selVal, baseVal).replace(/\n/g, '<br/>');
+        else textEl.innerHTML = selVal.replace(/\n/g, '<br/>');
+      });
+
+      const banner = document.getElementById('compare-banner');
+      const bannerName = document.getElementById('compare-agency-name');
+      if (selectedAgencyId !== baseAgencyId) {
+        bannerName.textContent = base.name;
+        banner.classList.add('is-visible');
+        banner.classList.remove('opacity-0', 'pointer-events-none');
+      } else {
+        banner.classList.remove('is-visible');
+        banner.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function updateCarouselVisuals() {
+      cardElements.forEach((item, index) => {
+        const isSel = item.id === selectedAgencyId, isBase = item.id === baseAgencyId;
+        const card = item.element, logo = card.querySelector('.agency-logo'), label = card.querySelector('.agency-label'), name = card.querySelector('.agency-name'), lockBtn = card.querySelector('.lock-btn'), dot = document.getElementById('dot-' + Math.min(index, 2)), rating = card.querySelector('.agency-rating');
+        if (isSel) {
+          card.classList.add('border-stone-800', 'bg-stone-900', 'scale-[1.02]', 'opacity-100'); card.classList.remove('border-transparent', 'bg-white', 'opacity-60');
+          logo.classList.add('scale-110'); label.classList.add('text-[#d4af37]'); label.classList.remove('text-stone-400');
+          name.classList.add('font-bold', 'text-white'); name.classList.remove('font-medium', 'text-stone-700');
+          rating.classList.add('text-stone-300'); rating.classList.remove('text-stone-500');
+          if(dot) { dot.classList.add('w-4', 'bg-stone-800'); dot.classList.remove('w-1.5', 'bg-stone-300'); }
+        } else {
+          card.classList.remove('border-stone-800', 'bg-stone-900', 'scale-[1.02]', 'opacity-100'); card.classList.add('border-transparent', 'bg-white', 'opacity-60');
+          logo.classList.remove('scale-110'); label.classList.remove('text-[#d4af37]'); label.classList.add('text-stone-400');
+          name.classList.remove('font-bold', 'text-white'); name.classList.add('font-medium', 'text-stone-700');
+          rating.classList.remove('text-stone-300'); rating.classList.add('text-stone-500');
+          if(dot) { dot.classList.remove('w-4', 'bg-stone-800'); dot.classList.add('w-1.5', 'bg-stone-300'); }
+        }
+        lockBtn.innerHTML = isBase 
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="${isSel ? 'text-[#d4af37]' : 'text-stone-800'}"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="${isSel ? 'text-stone-400 hover:text-white' : 'text-stone-300 hover:text-stone-500'}"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+      });
+    }
+
+    initAgencyCarousel();
+
+    const viewAllBtn = document.getElementById('view-all-agencies-btn'), agencySheet = document.getElementById('agency-sheet'), sheetBackdrop = document.getElementById('agency-sheet-backdrop'), sheetContent = document.getElementById('agency-sheet-content'), closeSheetBtn = document.getElementById('close-agency-sheet'), sheetListContainer = document.getElementById('agency-list-sheet');
+    function renderAgencySheet() {
+      sheetListContainer.innerHTML = '';
+      agencies.forEach(agency => {
+        const isSel = agency.id === selectedAgencyId;
+        const btn = document.createElement('button');
+        btn.className = `w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${isSel ? 'border-stone-800 bg-stone-900 shadow-xl' : 'border-stone-100 bg-white hover:border-stone-200'}`;
+        btn.innerHTML = `<div class="flex items-center gap-4"><div class="w-12 h-12 bg-stone-50 border border-stone-100 rounded-full flex items-center justify-center text-2xl">${agency.logo}</div><div class="text-left"><p class="text-[10px] font-bold uppercase ${isSel ? 'text-[#d4af37]' : 'text-stone-400'}">${agency.label}</p><span class="text-sm ${isSel ? 'font-bold text-white' : 'font-medium text-stone-700'}">${agency.name}</span></div></div>${isSel ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[#d4af37]"><polyline points="20 6 9 17 4 12"/></svg>' : ''}`;
+        btn.addEventListener('click', () => { if (selectedAgencyId !== agency.id) { selectedAgencyId = agency.id; updateCarouselVisuals(); updateAllUI(); const target = cardElements.find(c => c.id === agency.id)?.element; if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'center' }); } setTimeout(closeSheet, 200); });
+        sheetListContainer.appendChild(btn);
+      });
+    }
+    const openSheet = () => { renderAgencySheet(); agencySheet.classList.remove('hidden'); void agencySheet.offsetWidth; sheetBackdrop.classList.remove('opacity-0'); sheetContent.classList.remove('translate-y-full'); };
+    const closeSheet = () => { sheetBackdrop.classList.add('opacity-0'); sheetContent.classList.add('translate-y-full'); setTimeout(() => agencySheet.classList.add('hidden'), 400); };
+    viewAllBtn.addEventListener('click', openSheet); closeSheetBtn.addEventListener('click', closeSheet); sheetBackdrop.addEventListener('click', closeSheet);
+    document.querySelectorAll('.collapsible-header').forEach(h => h.addEventListener('click', () => { const c = h.nextElementSibling, cv = h.querySelector('.chevron'); if (c.classList.contains('grid-rows-[1fr]')) { c.classList.replace('grid-rows-[1fr]', 'grid-rows-[0fr]'); cv.classList.add('rotate-180'); } else { c.classList.replace('grid-rows-[0fr]', 'grid-rows-[1fr]'); cv.classList.remove('rotate-180'); } }));
+
+    /* ========================================= */
+    /* ======== SOP 交互模块 JS ======== */
+    /* ========================================= */
+    const sopData = [
+      {
+        stageName: "预定前",
+        subNodes: [
+          { title: "需求沟通", desc: "1对1管家深入了解您的出行偏好与预算" },
+          { title: "方案定制", desc: "24小时内输出专属行程规划与报价明细" },
+          { title: "确认签约", desc: "线上确认行程，签署正规电子旅游合同" }
+        ]
+      },
+      {
+        stageName: "出行前",
+        subNodes: [
+          { title: "专属服务群", desc: "管家、计调、司机、导游齐聚，为您服务" },
+          { title: "出团通知书", desc: "提前发送详细天气、穿搭指南及注意事项" },
+          { title: "行前确认", desc: "提前1天确认航班/车次及专车接机信息" }
+        ]
+      },
+      {
+        stageName: "出行中",
+        subNodes: [
+          { title: "专车接机", desc: "司机举牌接站，协助搬运行李，直达酒店" },
+          { title: "沉浸游玩", desc: "金牌导游全程陪同讲解，纯玩无隐形消费" },
+          { title: "24h响应", desc: "行程中任何突发问题，管家全天候极速解决" }
+        ]
+      },
+      {
+        stageName: "出行后",
+        subNodes: [
+          { title: "专车送机", desc: "根据返程时间提前安排送机，不误点" },
+          { title: "服务回访", desc: "倾听您的真实反馈，不断优化服务体验" },
+          { title: "开具发票", desc: "提供正规电子发票，极速发送至邮箱" }
+        ]
+      }
+    ];
+
+    const sopTabs = document.querySelectorAll('.stageTabItem');
+    const sopContentContainer = document.getElementById('sopContentContainer');
+
+    function renderSopContent(index) {
+      const data = sopData[index];
+      let htmlStr = '<div class="sop-animate-fade">';
+      data.subNodes.forEach(node => {
+        htmlStr += `<div class="subNodeItem"><div class="stepperDot"><div class="stepperDotInner"></div></div><div class="stepperContent"><div class="stepperTitle">${node.title}</div><div class="stepperDesc">${node.desc}</div></div></div>`;
+      });
+      htmlStr += '</div>';
+      sopContentContainer.innerHTML = '';
+      setTimeout(() => { sopContentContainer.innerHTML = htmlStr; }, 10);
+    }
+
+    sopTabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        sopTabs.forEach(t => t.classList.remove('is-active'));
+        this.classList.add('is-active');
+        const idx = parseInt(this.getAttribute('data-index'));
+        renderSopContent(idx);
+      });
+    });
+  </script>
+</body>
+</html>
